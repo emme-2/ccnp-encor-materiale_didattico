@@ -1,0 +1,51 @@
+! MOD-04 — OSPF Troubleshooting
+! Questo cfg contiene errori intenzionali
+! NON mostrare questo file agli studenti prima del lab
+!
+! Errori presenti:
+!   e0/0.34 → ip ospf 1 area 0 (errato: doveva essere area 1) [T3]
+!   e0/0.45 → ip ospf network broadcast (R5 ha point-to-point) [T5]
+! Nota: virtual-link non configurato — lo studente lo configura in T6
+!
+hostname R4
+!
+no ip domain-lookup
+ip cef
+!
+interface Loopback0
+ ip address 4.4.4.4 255.255.255.255
+ ip ospf 1 area 0
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.14
+ encapsulation dot1Q 14
+ ip address 10.0.14.2 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 OSPF_KEY_R14
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+ ! ERRORE T3: area 0 — deve essere area 1
+!
+interface Ethernet0/0.45
+ encapsulation dot1Q 45
+ ip address 10.0.45.1 255.255.255.252
+ ip ospf network broadcast
+ ! ERRORE T5: broadcast — deve essere point-to-point
+ ip ospf 1 area 2
+!
+ip route 172.16.4.0 255.255.255.0 Null0
+!
+router ospf 1
+ router-id 4.4.4.4
+ area 2 stub
+ redistribute static subnets
+!
+end

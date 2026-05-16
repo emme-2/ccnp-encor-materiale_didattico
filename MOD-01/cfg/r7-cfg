@@ -1,0 +1,18 @@
+! MOD-01 cfg iniziale — R7
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-01/r7-cfg
+!
+hostname R7
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.17
+ encapsulation dot1Q 17
+ ip address 10.1.17.2 255.255.255.252
+ description P2P_to_R1_Area99
+ no shutdown
+!
+end

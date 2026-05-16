@@ -1,0 +1,30 @@
+! MOD-12 — MPLS L2VPN (xconnect / AToM)
+! Dispositivo : CE1
+! Stato iniziale: interfaccia Eth0/0.101 con IP (endpoint L2VPN lato CE)
+! Il CE non sa di essere su una rete MPLS — vede un link L2 diretto verso CE2
+! Test: ping 172.16.0.2 — dovrebbe funzionare quando xconnect è UP su PE1 e PE2
+!
+hostname CE1
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+no ip domain lookup
+ip routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.101
+ encapsulation dot1Q 101
+ ip address 172.16.0.1 255.255.255.0
+!
+no ip http server
+no ip http secure-server
+!
+line con 0
+ logging synchronous
+!
+end

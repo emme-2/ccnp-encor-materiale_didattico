@@ -1,0 +1,34 @@
+! ============================================================
+! CCNP ENCOR 350-401 v1.2  --  Sessione 9: IP Services & Network Assurance
+! Router: R4  (SENDER -- IOU senza ip routing)
+! TFTP path: 192.168.122.1/ENCOR/LAB09/r4-cfg
+! ============================================================
+!
+hostname R4-SENDER
+no ip domain-lookup
+no ip routing
+logging synchronous
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! -- Sub-interface VLAN 100: collegamento verso R1 --
+interface Ethernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.1.100 255.255.255.0
+ no shutdown
+!
+! -- Default gateway verso R1 --
+ip default-gateway 192.168.1.1
+!
+! ============================================================
+! USO NEL LAB:
+!   ping 239.1.1.1 repeat 9999999
+!   (lasciare attivo durante i Task 2-8)
+! ============================================================
+!
+end

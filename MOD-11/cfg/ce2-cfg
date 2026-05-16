@@ -1,0 +1,35 @@
+! MOD-11 — MPLS L3VPN
+! Dispositivo : CE2 (Customer Edge 2 — AS 65002)
+! Stato iniziale: connettività verso PE2 attiva — nessun routing dinamico
+! Lo studente configura: BGP AS 65002, neighbor PE2, network statement
+!
+hostname CE2
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.22
+ encapsulation dot1Q 22
+ ip address 192.168.2.1 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 192.168.2.2
+!
+no ip http server
+no ip http secure-server
+!
+line con 0
+ logging synchronous
+!
+end

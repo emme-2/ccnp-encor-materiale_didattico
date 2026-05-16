@@ -1,0 +1,50 @@
+! MOD-04 — OSPF Troubleshooting
+! Questo cfg contiene errori intenzionali
+! NON mostrare questo file agli studenti prima del lab
+!
+! Errori presenti:
+!   e0/0.12 → hello-interval 10 / dead-interval 40 (R2 ha hello 5 / dead 20) [T1]
+!   e0/0.14 → MD5 key "WRONGPASS" (R4 ha "OSPF_KEY_R14") [T4]
+!
+hostname R1
+!
+no ip domain-lookup
+ip cef
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ ip ospf 1 area 0
+ ipv6 address 2001:db8:1::1/128
+ ipv6 ospf 1 area 0
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+ ip ospf hello-interval 10
+ ip ospf dead-interval 40
+ ipv6 address 2001:db8:12::1/64
+ ipv6 ospf 1 area 0
+!
+interface Ethernet0/0.14
+ encapsulation dot1Q 14
+ ip address 10.0.14.1 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 WRONGPASS
+!
+router ospf 1
+ router-id 1.1.1.1
+!
+ipv6 unicast-routing
+ipv6 cef
+!
+ipv6 router ospf 1
+ router-id 1.1.1.1
+!
+end

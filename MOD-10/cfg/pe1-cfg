@@ -1,0 +1,38 @@
+! MOD-10 — MPLS LDP & Fondamenta
+! Dispositivo : PE1 (Provider Edge 1)
+! Stato iniziale: OSPF area 0 attivo — MPLS non ancora configurato
+! Lo studente configura: mpls ldp router-id, mpls ip sulle interfacce backbone
+!
+hostname PE1
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+!
+no ip http server
+no ip http secure-server
+!
+line con 0
+ logging synchronous
+!
+end

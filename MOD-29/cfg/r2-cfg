@@ -1,0 +1,48 @@
+! ============================================================
+! CCNP ENCOR 350-401 v1.2  --  MOD-29: Network Assurance
+! Router: R2
+! TFTP path: 192.168.122.1/ENCOR/MOD-29/r2-cfg
+! ============================================================
+!
+hostname R2
+no ip domain-lookup
+logging synchronous
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+! -- Loopback (OSPF Router-ID) --
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! -- Sub-interface VLAN 12: link P2P verso R1 --
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+! -- Sub-interface VLAN 23: link P2P verso R3 --
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.1 255.255.255.252
+ no shutdown
+!
+! -- OSPF Underlay --
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+!
+! -- NOTA: SNMP opzionale — configurare se necessario per Task SNMP --
+!
+end

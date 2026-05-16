@@ -1,0 +1,13 @@
+# Normalizza line endings: LF nel repo, checkout nativo
+* text=auto
+
+# Forza LF per i cfg IOS (paste sui router: nessun CRLF)
+MOD-*/cfg/* text eol=lf
+
+# File binari
+*.pptx binary
+*.docx binary
+*.zip  binary
+*.pdf  binary
+*.png  binary
+*.jpg  binary

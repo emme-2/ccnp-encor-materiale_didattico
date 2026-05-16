@@ -1,0 +1,61 @@
+! =============================================================================
+! CCNP ENCOR 350-401 v1.2  —  LAB 06  —  Virtualizzazione & Overlay
+! Router: ISP
+! Role:   Simulated Internet — global table only, no VRF
+! TFTP:   192.168.122.1/ENCOR/LAB06/isp-cfg
+! Load:   copy tftp://192.168.122.1/ENCOR/LAB06/isp-cfg running-config
+! =============================================================================
+
+hostname ISP
+! -----------------------------------------------------------------------------
+! LOOPBACK — underlay reference / management
+! -----------------------------------------------------------------------------
+interface Loopback0
+ description !! ISP management loopback
+ ip address 192.0.2.253 255.255.255.255
+ no shutdown
+!
+! -----------------------------------------------------------------------------
+! ETHERNET0/0  —  trunk to SW1
+!   VLAN 10: ISP <-> HUB     192.0.2.0/30
+!   VLAN 20: ISP <-> SP1   198.51.100.0/30
+!   VLAN 30: ISP <-> SP2   203.0.113.0/30
+! -----------------------------------------------------------------------------
+interface Ethernet0/0.10
+ description !! ISP <-> HUB — VLAN 10 (RFC 5737: 192.0.2.0/30)
+ encapsulation dot1Q 10
+ ip address 192.0.2.1 255.255.255.252
+!
+interface Ethernet0/0.20
+ description !! ISP <-> SP1 — VLAN 20 (RFC 5737: 198.51.100.0/30)
+ encapsulation dot1Q 20
+ ip address 198.51.100.1 255.255.255.252
+!
+interface Ethernet0/0.30
+ description !! ISP <-> SP2 — VLAN 30 (RFC 5737: 203.0.113.0/30)
+ encapsulation dot1Q 30
+ ip address 203.0.113.1 255.255.255.252
+!
+! -----------------------------------------------------------------------------
+! ROUTING — static routes to router loopbacks (tunnel sources)
+!   ISP must be able to return traffic originated from tunnel endpoints.
+!   These are /32 host routes pointing to the directly-connected PE.
+! -----------------------------------------------------------------------------
+
+! HUB Lo0 — reachable via HUB e0/0.10
+ip route 192.0.2.254 255.255.255.255 192.0.2.2
+
+! SP1 Lo0 — reachable via SP1 e0/0.20
+ip route 198.51.100.254 255.255.255.255 198.51.100.2
+
+! SP2 Lo0 — reachable via SP2 e0/0.30
+ip route 203.0.113.254 255.255.255.255 203.0.113.2
+
+! -----------------------------------------------------------------------------
+! VERIFY COMMANDS (instructor reference)
+!   show ip route
+!   ping 192.0.2.254    ! HUB Lo0
+!   ping 198.51.100.254 ! SP1 Lo0
+!   ping 203.0.113.254  ! SP2 Lo0
+! -----------------------------------------------------------------------------
+end

@@ -1,0 +1,36 @@
+! ============================================================
+! CCNP ENCOR 350-401 v1.2  --  MOD-29: Network Assurance
+! Router: R5  (Destinazione traffico)
+! TFTP path: 192.168.122.1/ENCOR/MOD-29/r5-cfg
+! ============================================================
+!
+hostname R5-DEST
+no ip domain-lookup
+logging synchronous
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+! -- ip routing abilitato per supporto route statica --
+ip routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! -- Sub-interface VLAN 300: collegamento verso R3 --
+interface Ethernet0/0.300
+ encapsulation dot1Q 300
+ ip address 192.168.3.100 255.255.255.0
+ no shutdown
+!
+! -- Route statica di default verso R3 --
+ip route 0.0.0.0 0.0.0.0 192.168.3.1
+!
+! ============================================================
+! USO NEL LAB:
+!   Il ping da R4 (ping 192.168.3.100) raggiunge questo router.
+!   R5 non richiede configurazione aggiuntiva per MOD-29.
+! ============================================================
+!
+end

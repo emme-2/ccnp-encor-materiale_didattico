@@ -1,0 +1,90 @@
+! MOD-15 — FHRP: HSRP, VRRP & GLBP
+! Dispositivo : SW1
+! Stato iniziale: EtherChannel Po1 + STP configurato — da MOD-13+14 completati
+!   SW1: root primario VLAN 10 (priority 4096), secondario VLAN 20 (priority 8192)
+!   PortFast + BPDU Guard su e1/0; Root Guard su Po1
+! Lo studente configura: HSRP v2, IP SLA tracking, failover
+!
+hostname SW1
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip name-server vrf LAB 1.1.1.1
+!
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 100
+ name TRANSIT-R1-SW1
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shutdown
+!
+interface Ethernet0/2
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet0/3
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ spanning-tree guard root
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.2 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.3 255.255.255.0
+ no shutdown
+!
+interface Vlan100
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+spanning-tree vlan 10 priority 4096
+spanning-tree vlan 20 priority 8192
+!
+ip route 0.0.0.0 0.0.0.0 10.0.12.1
+!
+ip tftp source-interface Ethernet0/0
+no ip http server
+no ip http secure-server
+ip dns view vrf LAB default
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end

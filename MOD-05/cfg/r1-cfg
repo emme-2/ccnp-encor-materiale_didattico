@@ -1,0 +1,59 @@
+! MOD-05 cfg iniziale — R1 (AS 65001 — ISP)
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-05/r1-cfg
+!
+! PRE-CONFIGURATO: OSPF 1 (IGP ISP) + iBGP full-mesh R1/R2/R3 + eBGP R1↔R4
+! R1 rappresenta l'infrastruttura ISP — non modificare durante il lab
+!
+hostname R1
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ description ISP_Internal_R1-R2
+ no shutdown
+!
+interface ethernet 0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ description ISP_Internal_R1-R3
+ no shutdown
+!
+interface ethernet 0/0.14
+ encapsulation dot1Q 14
+ ip address 172.16.14.1 255.255.255.252
+ description eBGP_to_R4_AS65000
+ no shutdown
+!
+interface loopback 0
+ ip address 1.1.1.1 255.255.255.255
+ description Router-ID_and_iBGP_source
+ no shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 1.1.1.1
+ ! iBGP verso R2 e R3 (update-source Loopback0):
+ neighbor 2.2.2.2 remote-as 65001
+ neighbor 2.2.2.2 update-source Loopback0
+ neighbor 2.2.2.2 next-hop-self
+ neighbor 3.3.3.3 remote-as 65001
+ neighbor 3.3.3.3 update-source Loopback0
+ neighbor 3.3.3.3 next-hop-self
+ ! eBGP verso R4 (link diretto — no multihop):
+ neighbor 172.16.14.2 remote-as 65000
+ ! Annuncio loopback ISP:
+ network 1.1.1.1 mask 255.255.255.255
+!
+end

@@ -1,0 +1,34 @@
+! ============================================================
+! CCNP ENCOR 350-401 v1.2  --  MOD-29: Network Assurance
+! Router: R4  (Generatore traffico -- IOU senza ip routing)
+! TFTP path: 192.168.122.1/ENCOR/MOD-29/r4-cfg
+! ============================================================
+!
+hostname R4-SENDER
+no ip domain-lookup
+no ip routing
+logging synchronous
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! -- Sub-interface VLAN 100: collegamento verso R1 --
+interface Ethernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.1.100 255.255.255.0
+ no shutdown
+!
+! -- Default gateway verso R1 --
+ip default-gateway 192.168.1.1
+!
+! ============================================================
+! USO NEL LAB:
+!   ping 192.168.3.100 repeat 9999999 size 1000
+!   (lasciare attivo durante i Task NF.1 e NF.2)
+! ============================================================
+!
+end

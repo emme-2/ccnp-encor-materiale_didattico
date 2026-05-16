@@ -1,0 +1,43 @@
+! MOD-10 — MPLS LDP & Fondamenta
+! Dispositivo : P1 (Provider Core 1)
+! Stato iniziale: OSPF area 0 attivo — MPLS non ancora configurato
+! Lo studente configura: mpls label protocol ldp, mpls ldp router-id, mpls ip sulle interfacce
+!
+hostname P1
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+!
+no ip http server
+no ip http secure-server
+!
+line con 0
+ logging synchronous
+!
+end

@@ -1,0 +1,49 @@
+! MOD-11 — MPLS L3VPN
+! Dispositivo : P2 (Provider Core 2)
+! Stato iniziale: uguale al risultato finale di MOD-10 (OSPF + MPLS LDP full)
+! P2 non richiede modifiche in questo modulo
+!
+hostname P2
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 4.4.4.4 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.24
+ encapsulation dot1Q 24
+ ip address 10.0.24.1 255.255.255.252
+ mpls ip
+!
+router ospf 1
+ router-id 4.4.4.4
+ network 4.4.4.4 0.0.0.0 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+ network 10.0.24.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+no ip http server
+no ip http secure-server
+!
+line con 0
+ logging synchronous
+!
+end

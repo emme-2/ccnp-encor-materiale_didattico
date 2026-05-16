@@ -1,0 +1,53 @@
+! MOD-03 cfg iniziale — R6
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-03/r6-cfg
+!
+hostname R6
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.6 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf priority 100
+ ipv6 address 2001:db8:0::6/64
+ ipv6 address fe80::6 link-local
+ no shutdown
+!
+interface ethernet 0/0.36
+ encapsulation dot1Q 36
+ ip address 10.0.36.2 255.255.255.252
+ description P2P_R3-R6_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:36::6/64
+ ipv6 address fe80::6 link-local
+ no shutdown
+!
+interface ethernet 0/0.56
+ encapsulation dot1Q 56
+ ip address 10.0.56.2 255.255.255.252
+ description P2P_R5-R6_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:56::6/64
+ ipv6 address fe80::6 link-local
+ no shutdown
+!
+router ospf 100
+ router-id 6.6.6.6
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface ethernet 0/0.3456
+ no passive-interface ethernet 0/0.36
+ no passive-interface ethernet 0/0.56
+!
+end

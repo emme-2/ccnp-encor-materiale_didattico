@@ -1,0 +1,60 @@
+! MOD-06 cfg iniziale — R4 (AS 65000 — Customer border verso R1)
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-06/r4-cfg
+!
+! STATO FINALE MOD-05:
+!   T1: OSPF 1 configurato (IGP Customer)
+!   T2: iBGP full-mesh verso R5 (5.5.5.5) e R6 (6.6.6.6)
+!   T4: network statement per 4.4.4.4/32 e 192.168.45.0/30 (redistribute rimosso)
+! Nessuna route-map / prefix-list / community / local-pref configurati
+!
+hostname R4
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.14
+ encapsulation dot1Q 14
+ ip address 172.16.14.2 255.255.255.252
+ description eBGP_to_R1_AS65001
+ no shutdown
+!
+interface ethernet 0/0.45
+ encapsulation dot1Q 45
+ ip address 192.168.45.1 255.255.255.252
+ description Customer_Internal_R4-R5
+ no shutdown
+!
+interface ethernet 0/0.46
+ encapsulation dot1Q 46
+ ip address 192.168.46.1 255.255.255.252
+ description Customer_Internal_R4-R6
+ no shutdown
+!
+interface loopback 0
+ ip address 4.4.4.4 255.255.255.255
+ description Router-ID_iBGP_source_AS65000
+ no shutdown
+!
+router ospf 1
+ router-id 4.4.4.4
+ network 4.4.4.4 0.0.0.0 area 0
+ network 192.168.45.0 0.0.0.3 area 0
+ network 192.168.46.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65000
+ bgp router-id 4.4.4.4
+ neighbor 172.16.14.1 remote-as 65001
+ neighbor 5.5.5.5 remote-as 65000
+ neighbor 5.5.5.5 update-source Loopback0
+ neighbor 5.5.5.5 next-hop-self
+ neighbor 6.6.6.6 remote-as 65000
+ neighbor 6.6.6.6 update-source Loopback0
+ neighbor 6.6.6.6 next-hop-self
+ network 4.4.4.4 mask 255.255.255.255
+ network 192.168.45.0 mask 255.255.255.252
+!
+end

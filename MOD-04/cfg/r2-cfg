@@ -1,0 +1,40 @@
+! MOD-04 — OSPF Troubleshooting
+! Questo cfg contiene errori intenzionali
+! NON mostrare questo file agli studenti prima del lab
+!
+! Errori presenti:
+!   e0/0.12 → hello-interval 5 / dead-interval 20 (R1 ha hello 10 / dead 40) [T1]
+!   e0/0.23 → ip mtu 1400 (R3 ha MTU default 1500) [T2]
+!   globale  → ipv6 unicast-routing assente (OSPFv3 non funziona) [T10]
+!
+hostname R2
+!
+no ip domain-lookup
+ip cef
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ ip ospf 1 area 0
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.2 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+ ip ospf hello-interval 5
+ ip ospf dead-interval 20
+!
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.1 255.255.255.252
+ ip mtu 1400
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+!
+router ospf 1
+ router-id 2.2.2.2
+!
+end

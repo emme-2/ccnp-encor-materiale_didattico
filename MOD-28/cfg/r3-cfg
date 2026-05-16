@@ -1,0 +1,56 @@
+! ============================================================
+! CCNP ENCOR 350-401 v1.2  --  Sessione 9: IP Services & Network Assurance
+! Router: R3  (LHR - Last Hop Router verso RECEIVER)
+! TFTP path: 192.168.122.1/ENCOR/LAB09/r3-cfg
+! ============================================================
+!
+hostname R3
+no ip domain-lookup
+logging synchronous
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+! -- Loopback (OSPF Router-ID) --
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! -- Sub-interface VLAN 13: link P2P verso R1 --
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+!
+! -- Sub-interface VLAN 23: link P2P verso R2 --
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.2 255.255.255.252
+ no shutdown
+!
+! -- Sub-interface VLAN 300: LAN verso R5 (RECEIVER) --
+interface Ethernet0/0.300
+ encapsulation dot1Q 300
+ ip address 192.168.3.1 255.255.255.0
+ no shutdown
+!
+! -- OSPF Underlay --
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+ network 192.168.3.0 0.0.0.255 area 0
+ passive-interface Ethernet0/0.300
+!
+! -- NOTA: ip multicast-routing NON configurato (Task 1) --
+!
+end

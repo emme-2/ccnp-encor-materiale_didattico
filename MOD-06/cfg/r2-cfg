@@ -1,0 +1,49 @@
+! MOD-06 cfg iniziale — R2 (AS 65001 — ISP internal)
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-06/r2-cfg
+!
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh operativo
+! Annuncia: 2.2.2.2/32 via network statement
+!
+hostname R2
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.2 255.255.255.252
+ description ISP_Internal_R1-R2
+ no shutdown
+!
+interface ethernet 0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.1 255.255.255.252
+ description ISP_Internal_R2-R3
+ no shutdown
+!
+interface loopback 0
+ ip address 2.2.2.2 255.255.255.255
+ description Router-ID_and_iBGP_source
+ no shutdown
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 2.2.2.2
+ neighbor 1.1.1.1 remote-as 65001
+ neighbor 1.1.1.1 update-source Loopback0
+ neighbor 1.1.1.1 next-hop-self
+ neighbor 3.3.3.3 remote-as 65001
+ neighbor 3.3.3.3 update-source Loopback0
+ neighbor 3.3.3.3 next-hop-self
+ network 2.2.2.2 mask 255.255.255.255
+!
+end

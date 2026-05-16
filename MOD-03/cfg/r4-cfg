@@ -1,0 +1,53 @@
+! MOD-03 cfg iniziale — R4
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-03/r4-cfg
+!
+hostname R4
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.4 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf priority 255
+ ipv6 address 2001:db8:0::4/64
+ ipv6 address fe80::4 link-local
+ no shutdown
+!
+interface ethernet 0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ description P2P_R3-R4_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:34::4/64
+ ipv6 address fe80::4 link-local
+ no shutdown
+!
+interface ethernet 0/0.45
+ encapsulation dot1Q 45
+ ip address 10.0.45.1 255.255.255.252
+ description P2P_R4-R5_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:45::4/64
+ ipv6 address fe80::4 link-local
+ no shutdown
+!
+router ospf 100
+ router-id 4.4.4.4
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface ethernet 0/0.3456
+ no passive-interface ethernet 0/0.34
+ no passive-interface ethernet 0/0.45
+!
+end

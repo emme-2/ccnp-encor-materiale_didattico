@@ -1,0 +1,60 @@
+! MOD-03 cfg iniziale — R2
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-03/r2-cfg
+!
+! Stato: MOD-02 completato + IPv6 indirizzi su sub-interface + ipv6 unicast-routing
+! IPv4 loopbacks Lo250/251/252 da MOD-02 T2 presenti
+! Loopback IPv6 NON configurate — lo studente le aggiunge in T3
+! NESSUN processo OSPFv3
+!
+hostname R2
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.52
+ encapsulation dot1Q 52
+ ip address 10.1.25.1 255.255.255.252
+ description P2P_to_R5_Area25
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ ipv6 address 2001:db8:25::1/64
+ ipv6 address fe80::2 link-local
+ no shutdown
+!
+interface loopback 25
+ ip address 192.168.25.1 255.255.255.0
+ description Mgmt_Loopback_R2
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 su Lo25 aggiunto dallo studente in T3
+!
+interface loopback 250
+ ip address 10.25.0.1 255.255.255.0
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+!
+interface loopback 251
+ ip address 10.25.1.1 255.255.255.0
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+!
+interface loopback 252
+ ip address 10.25.2.1 255.255.255.0
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+!
+router ospf 100
+ router-id 2.2.2.2
+ passive-interface default
+ no passive-interface ethernet 0/0.52
+!
+end

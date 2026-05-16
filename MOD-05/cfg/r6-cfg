@@ -1,0 +1,35 @@
+! MOD-05 cfg iniziale — R6 (AS 65000 — Customer internal)
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-05/r6-cfg
+!
+! AS number: 65000 (Customer)
+! DA CONFIGURARE: OSPF 1 (T1), iBGP full-mesh (T2)
+!
+hostname R6
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.46
+ encapsulation dot1Q 46
+ ip address 192.168.46.2 255.255.255.252
+ description Customer_Internal_R4-R6
+ no shutdown
+!
+interface ethernet 0/0.56
+ encapsulation dot1Q 56
+ ip address 192.168.56.2 255.255.255.252
+ description Customer_Internal_R5-R6
+ no shutdown
+!
+interface loopback 0
+ ip address 6.6.6.6 255.255.255.255
+ description Router-ID_iBGP_source_AS65000
+ no shutdown
+!
+! OSPF Customer: DA CONFIGURARE in Task T1
+! iBGP full-mesh verso R4 e R5: DA CONFIGURARE in Task T2
+!
+end

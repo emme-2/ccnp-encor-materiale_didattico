@@ -1,0 +1,138 @@
+! =============================================================================
+! CCNP ENCOR 350-401 v1.2  —  LAB 06  —  Virtualizzazione & Overlay
+! Router: SP1 (Spoke 1)
+! Role:   DMVPN Spoke / VRF CE
+! TFTP:   192.168.122.1/ENCOR/LAB06/sp1-cfg
+! Load:   copy tftp://192.168.122.1/ENCOR/LAB06/sp1-cfg running-config
+! =============================================================================
+! PRE-CONFIGURED (CUST-B):
+!   [PART 1] Lo2 VRF CUST-B  — BUG: vrf forwarding missing (Lo2 in global)
+!   [PART 2] Tu201            — BUG: tunnel destination wrong IP
+!   [PART 3] Static routes CUST-B  — correct (active after bugs fixed)
+!   [PART 5] Tu210 DMVPN CUST-B   — BUG: nhrp network-id wrong (211 vs 210)
+! CONFIGURED BY STUDENTS (CUST-A):
+!   [PART 1] VRF CUST-A + Lo1
+!   [PART 2] Tu101 (toward HUB)
+!   [PART 3] Static routes CUST-A
+!   [PART 4] IKEv2 + IPSec + tunnel protection Tu101
+!   [PART 5] Tu110 DMVPN CUST-A
+!   [PART 6] Named EIGRP CUST-A/CUST-B
+! =============================================================================
+
+hostname SP1
+
+!
+! -----------------------------------------------------------------------------
+! UNDERLAY — global table
+! -----------------------------------------------------------------------------
+interface Loopback0
+ description !! Tunnel source — global table
+ ip address 198.51.100.254 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.20
+ description !! ISP link — VLAN 20 — 198.51.100.0/30
+ encapsulation dot1Q 20
+ ip address 198.51.100.2 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 198.51.100.1
+
+! ============================================================================
+! VRF CUST-B  —  PRE-CONFIGURED
+! ============================================================================
+
+! -----------------------------------------------------------------------------
+! [PART 1]  VRF definition — correct
+! -----------------------------------------------------------------------------
+vrf definition CUST-B
+ description !! Customer B — pre-configured for reference/troubleshooting
+ rd 2:2
+ address-family ipv4
+ exit-address-family
+!
+! -----------------------------------------------------------------------------
+! [PART 1]  Loopback2 VRF CUST-B
+! *** BUG-1 [Part 1]: "vrf forwarding CUST-B" is MISSING
+!                     Lo2 ends up in the global routing table instead of VRF.
+!                     The VRF table has no entry for 10.2.2.1/32.
+!     DIAGNOSIS: show ip route vrf CUST-B     (no 10.2.2.1 entry)
+!                show ip interface Loopback2  (VRF: not set)
+!                show ip route | inc 10.2.2.1 (appears in global — wrong)
+!     FIX: interface Loopback2
+!            vrf forwarding CUST-B            <- removes IP, must re-add
+!            ip address 10.2.2.1 255.255.255.255
+! -----------------------------------------------------------------------------
+interface Loopback2
+ description !! VRF CUST-B customer loopback — BUG: no vrf forwarding
+ ip address 10.2.2.1 255.255.255.255
+!
+! -----------------------------------------------------------------------------
+! [PART 2]  GRE Tunnel CUST-B toward HUB
+! *** BUG-2 [Part 2]: tunnel destination points to SP2 (203.0.113.254)
+!                     instead of HUB (192.0.2.254).
+!                     GRE can be UP (no keepalive by default) but no traffic
+!                     reaches HUB. NHRP registration will also fail in Part 5.
+!     DIAGNOSIS: show interface Tunnel201  (Tunnel Destination: 203.0.113.254)
+!                ping vrf CUST-B 172.16.201.1  (fails — wrong destination)
+!     FIX: interface Tunnel201
+!            tunnel destination 192.0.2.254
+! -----------------------------------------------------------------------------
+interface Tunnel201
+ description !! GRE CUST-B SP1<->HUB — BUG: tunnel destination wrong
+ vrf forwarding CUST-B
+ ip address 172.16.201.2 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 203.0.113.254
+ tunnel mode gre ip
+ no shutdown
+!
+! -----------------------------------------------------------------------------
+! [PART 3]  Static routes VRF CUST-B — correct
+!           Active after Part 1/2 bugs are fixed.
+!           Students remove in Part 5 when switching to DMVPN.
+! -----------------------------------------------------------------------------
+ip route vrf CUST-B 10.2.1.1 255.255.255.255 Tunnel201
+ip route vrf CUST-B 10.2.3.1 255.255.255.255 Tunnel201
+!
+! -----------------------------------------------------------------------------
+! [PART 5]  DMVPN cloud CUST-B — SP1 spoke
+! *** BUG-3 [Part 5]: ip nhrp network-id 211 instead of 210
+!                     SP1 belongs to a different NHRP domain than HUB/SP2.
+!                     Registration is silently rejected — no error message.
+!     DIAGNOSIS: show dmvpn             (0 peers on SP1 side)
+!                show ip nhrp           (no entries — registration never sent)
+!                HUB# show ip nhrp      (SP1 absent from NHS table)
+!     FIX: interface Tunnel210
+!            ip nhrp network-id 210     <- correct value
+! -----------------------------------------------------------------------------
+interface Tunnel210
+ description !! DMVPN CUST-B cloud — SP1 spoke — BUG: wrong nhrp network-id
+ vrf forwarding CUST-B
+ ip address 172.16.210.11 255.255.255.0
+ tunnel source Loopback0
+ tunnel mode gre multipoint
+ ip nhrp network-id 211
+ ip nhrp nhs 172.16.210.1
+ ip nhrp map 172.16.210.1 192.0.2.254
+ ip nhrp map multicast 192.0.2.254
+ ip nhrp shortcut
+ no shutdown
+!
+! ============================================================================
+! VRF CUST-A  —  TO BE CONFIGURED BY STUDENTS
+! ============================================================================
+! [PART 1]  vrf definition CUST-A  +  interface Loopback1
+! [PART 2]  interface Tunnel101 (toward HUB)
+! [PART 3]  ip route vrf CUST-A ...
+! [PART 4]  IKEv2 + IPSec + tunnel protection Tu101
+! [PART 5]  interface Tunnel110 (mGRE DMVPN CUST-A)
+! [PART 6]  router eigrp LAB-ENCOR (CUST-A AS1 + CUST-B AS2)
+!
+! -----------------------------------------------------------------------------
+! VERIFY COMMANDS — Part 0 (underlay)
+!   ping 192.0.2.2              ! HUB underlay
+!   ping 203.0.113.2            ! SP2 underlay
+!   ping 192.0.2.253 source lo0 ! ISP Lo0
+!   show ip route               ! default route present
+! -----------------------------------------------------------------------------
+end

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem \"C:\\\\dev\\\\Materiale Didattico CCNP\" -Recurse -Depth 2)",
+      "Bash(Select-Object FullName, Name, Extension)",
+      "Bash(Format-Table -AutoSize)"
+    ]
+  }
+}

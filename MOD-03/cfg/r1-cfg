@@ -1,0 +1,69 @@
+! MOD-03 cfg iniziale — R1
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-03/r1-cfg
+!
+! Stato: MOD-02 completato + IPv6 indirizzi su sub-interface + ipv6 unicast-routing
+! IPv4 loopbacks Lo150/151/152 da MOD-02 T2 presenti
+! Loopback IPv6 NON configurate — lo studente le aggiunge in T3
+! NESSUN processo OSPFv3
+!
+hostname R1
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.51
+ encapsulation dot1Q 51
+ ip address 10.1.15.1 255.255.255.252
+ description P2P_to_R5_Area15
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ ipv6 address 2001:db8:15::1/64
+ ipv6 address fe80::1 link-local
+ no shutdown
+!
+interface ethernet 0/0.17
+ encapsulation dot1Q 17
+ ip address 10.1.17.1 255.255.255.252
+ description P2P_to_R7_Area99
+ no shutdown
+!
+interface loopback 15
+ ip address 192.168.15.1 255.255.255.0
+ description Mgmt_Loopback_R1
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 su Lo15 aggiunto dallo studente in T3
+!
+interface loopback 150
+ ip address 10.15.0.1 255.255.255.0
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 2001:db8:1:150::1/64 aggiunto dallo studente in T3
+!
+interface loopback 151
+ ip address 10.15.1.1 255.255.255.0
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 2001:db8:1:151::1/64 aggiunto dallo studente in T3
+!
+interface loopback 152
+ ip address 10.15.2.1 255.255.255.0
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 2001:db8:1:152::1/64 aggiunto dallo studente in T3
+!
+router ospf 100
+ router-id 1.1.1.1
+ passive-interface default
+ no passive-interface ethernet 0/0.51
+!
+end

@@ -1,0 +1,29 @@
+! MOD-01 cfg iniziale — R1
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-01/r1-cfg
+!
+hostname R1
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.51
+ encapsulation dot1Q 51
+ ip address 10.1.15.1 255.255.255.252
+ description P2P_to_R5_Area15
+ no shutdown
+!
+interface ethernet 0/0.17
+ encapsulation dot1Q 17
+ ip address 10.1.17.1 255.255.255.252
+ description P2P_to_R7_Area99
+ no shutdown
+!
+interface loopback 15
+ ip address 192.168.15.1 255.255.255.0
+ description Mgmt_Loopback_R1
+ no shutdown
+!
+end

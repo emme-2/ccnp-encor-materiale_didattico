@@ -1,0 +1,28 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# PDF generati (si rigenerano da .md)
+**/*_workbook.pdf
+**/*_soluzione.pdf
+MVP_DELIVERY.pdf
+
+# Archivi temporanei (eccetto repo lab)
+*.zip
+!MOD-32/ENCOR-LAB10-repo.zip
+
+# Node
+node_modules/

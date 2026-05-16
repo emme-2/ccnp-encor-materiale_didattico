@@ -1,0 +1,40 @@
+! ============================================================
+! CCNP ENCOR 350-401 v1.2  --  Sessione 9: IP Services & Network Assurance
+! Router: R5  (RECEIVER -- ip routing abilitato per supporto IGMP join-group)
+! TFTP path: 192.168.122.1/ENCOR/LAB09/r5-cfg
+! ============================================================
+!
+hostname R5-RECEIVER
+no ip domain-lookup
+logging synchronous
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+! -- ip routing abilitato: necessario per ip igmp join-group su IOU --
+ip routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! -- Sub-interface VLAN 300: collegamento verso R3 --
+interface Ethernet0/0.300
+ encapsulation dot1Q 300
+ ip address 192.168.3.100 255.255.255.0
+ no shutdown
+!
+! -- Route statica di default verso R3 (sostituisce default-gateway con ip routing ON) --
+ip route 0.0.0.0 0.0.0.0 192.168.3.1
+!
+! ============================================================
+! USO NEL LAB (Task 3):
+!   interface Ethernet0/0.300
+!    ip igmp join-group 239.1.1.1
+!
+! VERIFICA:
+!   show ip igmp groups
+!   show ip igmp interface Ethernet0/0.300
+! ============================================================
+!
+end

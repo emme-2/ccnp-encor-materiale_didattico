@@ -1,0 +1,49 @@
+! MOD-05 cfg iniziale — R4 (AS 65000 — Customer border)
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-05/r4-cfg
+!
+! AS number: 65000 (Customer)
+! PRE-CONFIGURATO: eBGP verso R1 (172.16.14.1) — link diretto, no OSPF necessario
+! DA CONFIGURARE (Task T1): OSPF 1 per raggiungibilita' loopback
+! DA CONFIGURARE (Task T2): iBGP full-mesh verso R5 e R6
+!
+hostname R4
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.14
+ encapsulation dot1Q 14
+ ip address 172.16.14.2 255.255.255.252
+ description eBGP_to_R1_AS65001
+ no shutdown
+!
+interface ethernet 0/0.45
+ encapsulation dot1Q 45
+ ip address 192.168.45.1 255.255.255.252
+ description Customer_Internal_R4-R5
+ no shutdown
+!
+interface ethernet 0/0.46
+ encapsulation dot1Q 46
+ ip address 192.168.46.1 255.255.255.252
+ description Customer_Internal_R4-R6
+ no shutdown
+!
+interface loopback 0
+ ip address 4.4.4.4 255.255.255.255
+ description Router-ID_iBGP_source_AS65000
+ no shutdown
+!
+! OSPF Customer: DA CONFIGURARE in Task T1
+! (necessario per raggiungibilita' 5.5.5.5 e 6.6.6.6 via iBGP loopback)
+!
+router bgp 65000
+ bgp router-id 4.4.4.4
+ ! eBGP verso R1 — pre-configurato, usa link diretto 172.16.14.x
+ neighbor 172.16.14.1 remote-as 65001
+ ! iBGP verso R5 e R6: DA AGGIUNGERE in Task T2
+!
+end

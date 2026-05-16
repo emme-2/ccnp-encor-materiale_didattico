@@ -1,0 +1,58 @@
+! MOD-04 — OSPF Troubleshooting
+! Questo cfg contiene errori intenzionali
+! NON mostrare questo file agli studenti prima del lab
+!
+! Errori presenti:
+!   Lo0 → ipv6 ospf area NON configurato (prefisso 2001:db8:3::3/128 assente da OSPFv3) [T11]
+! Nota: virtual-link non configurato — lo studente lo configura in T6
+!
+hostname R3
+!
+no ip domain-lookup
+ip cef
+!
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ ip ospf 1 area 0
+ ipv6 address 2001:db8:3::3/128
+ ! ERRORE T11: manca ipv6 ospf 1 area 0 su questo loopback
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.2 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+ ipv6 address 2001:db8:23::2/64
+ ipv6 ospf 1 area 0
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 1
+!
+ip route 192.168.100.0 255.255.255.0 Null0
+ip route 192.168.200.0 255.255.255.0 Null0
+!
+router ospf 1
+ router-id 3.3.3.3
+ redistribute static subnets route-map OSPF_REDIST
+!
+ip prefix-list PL_E1 seq 5 permit 192.168.200.0/24
+!
+route-map OSPF_REDIST permit 10
+ match ip address prefix-list PL_E1
+ set metric-type type-1
+!
+route-map OSPF_REDIST permit 20
+!
+ipv6 unicast-routing
+ipv6 cef
+!
+ipv6 router ospf 1
+ router-id 3.3.3.3
+!
+end

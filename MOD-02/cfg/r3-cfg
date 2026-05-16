@@ -1,0 +1,47 @@
+! MOD-02 cfg iniziale — R3
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-02/r3-cfg
+!
+! Stato: fine MOD-01 (Area 0 funzionante, priority 0 su Broadcast, Ring P2P)
+!
+hostname R3
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.3 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf priority 0
+ no shutdown
+!
+interface ethernet 0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+ description P2P_R3-R4_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ no shutdown
+!
+interface ethernet 0/0.36
+ encapsulation dot1Q 36
+ ip address 10.0.36.1 255.255.255.252
+ description P2P_R3-R6_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ no shutdown
+!
+router ospf 100
+ router-id 3.3.3.3
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface ethernet 0/0.3456
+ no passive-interface ethernet 0/0.34
+ no passive-interface ethernet 0/0.36
+!
+end

@@ -1,0 +1,52 @@
+! MOD-11 — MPLS L3VPN
+! Dispositivo : PE1 (Provider Edge 1)
+! Stato iniziale: MOD-10 completato (OSPF + MPLS LDP up)
+!                 Interfaccia CE1 pre-configurata con IP ma SENZA VRF
+! Lo studente configura: ip vrf CUST_A, ip vrf forwarding sull'interfaccia,
+!                        MP-BGP VPNv4 verso PE2, eBGP CE-PE
+!
+! NOTA PEDAGOGICA: quando si esegue "ip vrf forwarding CUST_A" su Eth0/0.11
+!                  l'indirizzo IP viene rimosso automaticamente da IOS — riassegnarlo subito.
+!
+hostname PE1
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.11
+ encapsulation dot1Q 11
+ ip address 192.168.1.2 255.255.255.252
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+no ip http server
+no ip http secure-server
+!
+line con 0
+ logging synchronous
+!
+end

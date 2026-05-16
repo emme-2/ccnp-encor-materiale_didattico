@@ -1,0 +1,27 @@
+! MOD-04 — OSPF Troubleshooting
+! Questo cfg NON contiene errori intenzionali
+! R5 è configurato correttamente — l'errore di T5 è su R4 (network broadcast)
+!
+hostname R5
+!
+no ip domain-lookup
+ip cef
+!
+interface Loopback0
+ ip address 5.5.5.5 255.255.255.255
+ ip ospf 1 area 2
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.45
+ encapsulation dot1Q 45
+ ip address 10.0.45.2 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 1 area 2
+!
+router ospf 1
+ router-id 5.5.5.5
+ area 2 stub
+!
+end

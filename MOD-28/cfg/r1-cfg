@@ -1,0 +1,61 @@
+! ============================================================
+! CCNP ENCOR 350-401 v1.2  --  Sessione 9: IP Services & Network Assurance
+! Router: R1
+! TFTP path: 192.168.122.1/ENCOR/LAB09/r1-cfg
+! Caricamento: copy tftp running-config
+! ============================================================
+!
+! -- Sistema --
+hostname R1
+no ip domain-lookup
+logging synchronous
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+! -- Loopback (OSPF Router-ID + RP raggiungibile) --
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+! -- Fisica: e0/0 up, nessun IP diretto --
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! -- Sub-interface VLAN 12: link P2P verso R2 --
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ no shutdown
+!
+! -- Sub-interface VLAN 13: link P2P verso R3 --
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ no shutdown
+!
+! -- Sub-interface VLAN 100: LAN verso R4 (SENDER) --
+interface Ethernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.1.1 255.255.255.0
+ no shutdown
+!
+! -- OSPF Underlay: process 1, area 0 --
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 192.168.1.0 0.0.0.255 area 0
+ passive-interface Ethernet0/0.100
+!
+! -- NOTA: ip multicast-routing NON configurato (Task 1) --
+! -- NOTA: ip pim NON configurato (Task 1) --
+! -- NOTA: ip flow NON configurato (Task 9 BONUS) --
+!
+end

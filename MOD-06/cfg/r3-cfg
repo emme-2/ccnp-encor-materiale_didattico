@@ -1,0 +1,57 @@
+! MOD-06 cfg iniziale — R3 (AS 65001 — ISP border verso R5)
+! Carica via TFTP: copy tftp: running-config
+! TFTP path: 192.168.122.1/ENCOR/MOD-06/r3-cfg
+!
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh + eBGP R3↔R5 operativo (T3 completato)
+! Annuncia: 3.3.3.3/32 via network statement
+! Nessuna route-map / community / local-pref configurati
+!
+hostname R3
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+ description ISP_Internal_R1-R3
+ no shutdown
+!
+interface ethernet 0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.2 255.255.255.252
+ description ISP_Internal_R2-R3
+ no shutdown
+!
+interface ethernet 0/0.35
+ encapsulation dot1Q 35
+ ip address 172.16.35.1 255.255.255.252
+ description eBGP_to_R5_AS65000
+ no shutdown
+!
+interface loopback 0
+ ip address 3.3.3.3 255.255.255.255
+ description Router-ID_and_iBGP_source
+ no shutdown
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 3.3.3.3
+ neighbor 1.1.1.1 remote-as 65001
+ neighbor 1.1.1.1 update-source Loopback0
+ neighbor 1.1.1.1 next-hop-self
+ neighbor 2.2.2.2 remote-as 65001
+ neighbor 2.2.2.2 update-source Loopback0
+ neighbor 2.2.2.2 next-hop-self
+ neighbor 172.16.35.2 remote-as 65000
+ network 3.3.3.3 mask 255.255.255.255
+!
+end
