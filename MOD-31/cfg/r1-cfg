@@ -1,0 +1,51 @@
+! MOD-31 cfg iniziale — R1 (target, router da proteggere con ACL e CoPP)
+! Stato: OSPF attivo, SSH configurato, nessuna ACL, nessuna CoPP
+! Task T1: Standard ACL
+! Task T2: Extended ACL
+! Task T3: Reflexive ACL + IPv6 ACL
+! Task T4: CoPP
+!
+hostname R1
+no ip domain-lookup
+ipv6 unicast-routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ ipv6 address 2001:db8:12::1/64
+ description Link_to_R2
+ ip ospf 1 area 0
+ no shutdown
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ ipv6 address 2001:db8:1::1/128
+ description Target_Router-ID
+ no shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ passive-interface Loopback0
+!
+! SSH v2 pre-configurato (necessario per Task T1/T2 verifica):
+ip domain-name lab.encor
+ip ssh version 2
+username admin privilege 15 secret Cisco@123
+!
+line con 0
+ logging synchronous
+!
+line vty 0 4
+ login local
+ ! transport input ssh telnet -- entrambi abilitati prima che lo studente applichi le ACL
+ transport input ssh telnet
+!
+! Nessuna ACL configurata -- DA FARE in Task T1-T3
+! Nessuna CoPP configurata -- DA FARE in Task T4
+!
+end

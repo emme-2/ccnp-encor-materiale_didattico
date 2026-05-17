@@ -1,0 +1,20 @@
+! MOD-27 cfg iniziale — PC2 (host interno simulato con IOU)
+! Stato: IP LAN configurato, default route verso R-GW
+!
+hostname PC2
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.1.20 255.255.255.0
+ description LAN_Inside
+ no shutdown
+!
+! Default gateway verso R-GW:
+ip route 0.0.0.0 0.0.0.0 192.168.1.1
+!
+end

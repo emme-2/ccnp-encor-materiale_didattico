@@ -1,0 +1,38 @@
+! MOD-27 cfg iniziale — R-GW (NAT Gateway)
+! Stato: interfacce inside/outside configurate, default route verso R-ISP
+! Nessuna configurazione NAT o NTP — tutto da configurare nei Task T1-T4
+!
+hostname R-GW
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+! Interfaccia WAN (outside NAT):
+interface Ethernet0/0.10
+ encapsulation dot1Q 10
+ ip address 203.0.113.2 255.255.255.252
+ description WAN_Outside
+ ip nat outside
+ no shutdown
+!
+! Interfaccia LAN (inside NAT):
+interface Ethernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.1.1 255.255.255.0
+ description LAN_Inside
+ ip nat inside
+ no shutdown
+!
+interface Loopback0
+ ip address 10.0.0.1 255.255.255.255
+ no shutdown
+!
+! Default route verso R-ISP:
+ip route 0.0.0.0 0.0.0.0 203.0.113.1
+!
+! NAT: DA CONFIGURARE in Task T1 (static), T2 (dynamic), T3 (PAT)
+! NTP: DA CONFIGURARE in Task T4
+!
+end

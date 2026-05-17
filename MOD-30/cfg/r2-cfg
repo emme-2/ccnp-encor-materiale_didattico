@@ -1,0 +1,21 @@
+! MOD-30 cfg iniziale — R2 (client di test SSH/Telnet)
+! Stato: IP configurati
+!
+hostname R2
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.12.0.2 255.255.255.252
+ description Lab_to_R1
+ no shutdown
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ no shutdown
+!
+end

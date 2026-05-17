@@ -14,7 +14,7 @@
 | MOD-04 | OSPF Troubleshooting | Routing | ✅ | ✅ | ✅ | ✅ |
 | MOD-05 | BGP Fondamenta | Routing | ✅ | ✅ | ✅ | ✅ |
 | MOD-06 | BGP Traffic Engineering | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-07 | BGP Route Reflector & IPv6 BGP | Routing | ⬜ | ⬜ | ⬜ | ❌ |
+| MOD-07 | BGP Route Reflector & IPv6 BGP | Routing | ✅ | ✅ | ✅ | ✅ |
 | MOD-08 | Route Manipulation & PBR | Routing | ⬜ | ⬜ | ⬜ | ❌ |
 | MOD-09 | Redistribuzione & Loop Prevention | Routing | ⬜ | ⬜ | ⬜ | ❌ |
 | MOD-10 | MPLS LDP & Fondamenta | MPLS | ✅ | ✅ | ✅ | ✅ |
@@ -34,11 +34,11 @@
 | MOD-24 | Wireless Deployment & WLC | Wireless | ⬜ | ⬜ | n/a | ❌ |
 | MOD-25 | Wireless Security | Wireless | ⬜ | ⬜ | n/a | ❌ |
 | MOD-26 | QoS MQC & CoPP | QoS | ✅ | ✅ | ✅ | ✅ |
-| MOD-27 | NAT, PAT & NTP | IP Services | ⬜ | ⬜ | ⬜ | ❌ |
+| MOD-27 | NAT, PAT & NTP | IP Services | ✅ | ✅ | ✅ | ✅ |
 | MOD-28 | Multicast PIM & Auto-RP | Multicast | ✅ | ✅ | ✅ | ✅ |
 | MOD-29 | NetFlow & SNMP | Assurance | ✅ | ✅ | ✅ | ✅ |
-| MOD-30 | AAA & RADIUS | Security | ⬜ | ⬜ | n/a | ❌ |
-| MOD-31 | ACL, CoPP & Infrastructure Sec. | Security | ⬜ | ⬜ | ⬜ | ❌ |
+| MOD-30 | AAA & RADIUS | Security | ✅ | ✅ | ✅ | ✅ |
+| MOD-31 | ACL, CoPP & Infrastructure Sec. | Security | ✅ | ✅ | ✅ | ✅ |
 | MOD-32 | EEM & Python Base | Automation | ✅ | ✅ | n/a | ✅ |
 | MOD-33 | Netmiko & Nornir | Automation | ✅ | ✅ | n/a | ✅ |
 | MOD-34 | Ansible & Git | Automation | ✅ | ✅ | n/a | ✅ |
@@ -79,6 +79,10 @@ Pronti per consegna immediata agli studenti (workbook + soluzione + cfg):
 | **MOD-33** | Netmiko & Nornir | automation — nessun cfg IOU necessario |
 | **MOD-34** | Ansible & Git | automation — nessun cfg IOU necessario |
 | **MOD-35** | RESTCONF/NETCONF | solo teoria — note_docente.md completo (21 slide) |
+| **MOD-07** | BGP Route Reflector & IPv6 BGP | `MOD-07/cfg/` — r1-cfg … r5-cfg |
+| **MOD-27** | NAT/PAT & NTP | `MOD-27/cfg/` — r-isp-cfg · r-gw-cfg · pc1-cfg · pc2-cfg |
+| **MOD-30** | Device Security & AAA | `MOD-30/cfg/` — r1-cfg · r2-cfg (FreeRADIUS: 192.168.122.100) |
+| **MOD-31** | ACL & CoPP | `MOD-31/cfg/` — r1-cfg · r2-cfg |
 
 ---
 
@@ -147,17 +151,17 @@ Moduli al momento non sviluppati (solo struttura placeholder):
 | MOD | Titolo | Motivazione |
 |-----|--------|-------------|
 | ~~MOD-04~~ | ~~OSPF Troubleshooting~~ | ✅ Completato 2026-05-16 |
-| MOD-07 | BGP Route Reflector | Nessun sorgente; dipende da completamento MOD-05/06 |
+| ~~MOD-07~~ | ~~BGP Route Reflector & IPv6 BGP~~ | ✅ Completato 2026-05-17 |
+| ~~MOD-27~~ | ~~NAT/PAT & NTP~~ | ✅ Completato 2026-05-17 |
+| ~~MOD-30~~ | ~~Device Security & AAA~~ | ✅ Completato 2026-05-17 |
+| ~~MOD-31~~ | ~~ACL & CoPP~~ | ✅ Completato 2026-05-17 |
 | MOD-08 | Route Manipulation & PBR | Gap critico syllabus — 0% materiale; alta priorità roadmap |
-| MOD-09 | Redistribuzione | Dipende da MOD-05/07/08; sviluppo successivo |
+| MOD-09 | Redistribuzione | Dipende da MOD-08; sviluppo successivo |
 | MOD-21 | SD-WAN | Solo demo dCloud; nessun lab GNS3 possibile |
 | MOD-22 | SD-Access | Solo demo dCloud; coperto parzialmente in MOD-20 |
 | MOD-23 | Wireless RF | Richiede hardware reale o emulatore; assente dal corso 2026 |
 | MOD-24 | Wireless Deployment | Come MOD-23 |
 | MOD-25 | Wireless Security | Come MOD-23 |
-| MOD-27 | NAT, PAT & NTP | Menzionati nel gap analysis; sviluppo da schedulare |
-| MOD-30 | AAA & RADIUS | Bonus in LAB09; richiede container FreeRADIUS dedicato |
-| MOD-31 | ACL & Infrastructure Sec. | Gap critico syllabus; dipende da topologia dedicata |
 
 ---
 

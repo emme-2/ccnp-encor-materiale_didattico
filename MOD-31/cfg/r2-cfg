@@ -1,0 +1,30 @@
+! MOD-31 cfg iniziale — R2 (attaccante/tester per ACL e CoPP)
+! Stato: OSPF attivo, IP configurati
+!
+hostname R2
+no ip domain-lookup
+ipv6 unicast-routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.2 255.255.255.252
+ ipv6 address 2001:db8:12::2/64
+ description Link_to_R1
+ ip ospf 1 area 0
+ no shutdown
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ ipv6 address 2001:db8:2::2/128
+ no shutdown
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ passive-interface Loopback0
+!
+end

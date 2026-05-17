@@ -1,19 +1,31 @@
 ﻿---
 modulo: MOD-31
-titolo: ACL, CoPP & Infrastructure Security
+titolo: ACL & CoPP
 area: AREA 12 — SECURITY
 tipo: LAB
-codici_syllabus: 5.2
+codici_syllabus: 5.2.a · 5.2.b
 ore: 2h
-stato: PLACEHOLDER — DA SVILUPPARE
-fonte: LAB07 T10 + DA SVILUPPARE
+stato: COMPLETO
+prerequisiti: MOD-01 · MOD-26
 ---
-# MOD-31 — ACL, CoPP & Infrastructure Security
+# MOD-31 — ACL & CoPP
+
+**Stato:** COMPLETO ✅
 
 ## Deliverable
-- [ ] workbook.md
-- [ ] slide.pptx   _(generare da template master_slide.pptx)_
-- [ ] cfg/         _(file TFTP per ogni device)_
-- [ ] soluzione.md
-## Note
-ACL standard/extended, CoPP (class-map CP-*, policy-map COPP, service-policy input), ZBFW/MACsec/TrustSec teoria. Task T10 LAB07.
+
+| File | Stato |
+|------|-------|
+| workbook.md | ✅ |
+| soluzione.md | ✅ |
+| cfg/r1-cfg | ✅ |
+| cfg/r2-cfg | ✅ |
+| slide.pptx | ❌ da sviluppare |
+
+## Contenuto
+
+- **T1** — Standard ACL (source IP, posizionamento vicino destinazione)
+- **T2** — Extended ACL (src+dst+port+proto, vicino sorgente, OSPF permit)
+- **T3** — Reflexive ACL (stateful) + IPv6 ACL (ipv6 traffic-filter)
+- **T4** — CoPP Control Plane Policing (class-map, policy-map, control-plane service-policy)
+- **T5** — Troubleshooting ACL (direzione sbagliata, implicit deny OSPF, sequenza errata)

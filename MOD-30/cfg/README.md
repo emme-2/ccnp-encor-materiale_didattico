@@ -1,13 +1,17 @@
-﻿# cfg/ — File configurazione TFTP
+﻿# MOD-30 — cfg iniziali
 
-> **Stato:** PLACEHOLDER — aggiungere i file cfg per ogni device
+| File | Dispositivo | Ruolo |
+|------|-------------|-------|
+| r1-cfg | R1 | NAS (device da proteggere e configurare) |
+| r2-cfg | R2 | Client SSH/Telnet per i test |
 
-I file in questa cartella vengono caricati dai device al primo avvio via TFTP:
-```
-copy tftp://192.168.122.1/ENCOR/MOD-30/device-cfg running-config
-```
+**Nota ambiente:** FreeRADIUS gira come container sulla VM GNS3.
+Indirizzo di default: 192.168.122.100.
+Modificare nel r1-cfg se l'IP è diverso nel proprio ambiente.
 
-## Device attesi
-| Device | File | Stato |
-|--------|------|-------|
-| — | device-cfg | DA CREARE |
+**Stato iniziale pre-caricato:**
+- IP configurati su tutte le interfacce
+- Nessuna password configurata
+- Nessuna configurazione AAA
+- SSH non abilitato
+- VTY aperte (transport input all) — da hardening in Task T1

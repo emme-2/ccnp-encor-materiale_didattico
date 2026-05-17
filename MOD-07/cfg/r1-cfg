@@ -1,0 +1,75 @@
+! MOD-07 cfg iniziale — R1 (AS 65001 — Route Reflector candidate)
+! Stato: iBGP full-mesh configurato — NESSUN RR — IPv6 interfaces up, NO AF ipv6 in BGP
+! Task T2: converti R1 in Route Reflector
+! Task T3: aggiungi address-family ipv6
+!
+hostname R1
+no ip domain-lookup
+ipv6 unicast-routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ description iBGP_OSPF_R1-R2
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ description iBGP_OSPF_R1-R3
+ no shutdown
+!
+interface Ethernet0/0.14
+ encapsulation dot1Q 14
+ ip address 10.0.14.1 255.255.255.252
+ description iBGP_OSPF_R1-R4
+ no shutdown
+!
+interface Ethernet0/0.15
+ encapsulation dot1Q 15
+ ip address 172.16.15.1 255.255.255.252
+ description eBGP_to_R5_AS65002
+ no shutdown
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ ipv6 address 2001:db8:1::1/128
+ description RID_iBGP_source
+ no shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.14.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 1.1.1.1
+ neighbor 2.2.2.2 remote-as 65001
+ neighbor 2.2.2.2 update-source Loopback0
+ neighbor 2.2.2.2 next-hop-self
+ neighbor 3.3.3.3 remote-as 65001
+ neighbor 3.3.3.3 update-source Loopback0
+ neighbor 3.3.3.3 next-hop-self
+ neighbor 4.4.4.4 remote-as 65001
+ neighbor 4.4.4.4 update-source Loopback0
+ neighbor 4.4.4.4 next-hop-self
+ neighbor 172.16.15.2 remote-as 65002
+ !
+ address-family ipv4
+  neighbor 2.2.2.2 activate
+  neighbor 3.3.3.3 activate
+  neighbor 4.4.4.4 activate
+  neighbor 172.16.15.2 activate
+  network 1.1.1.1 mask 255.255.255.255
+ exit-address-family
+ !
+ ! address-family ipv6 -- DA CONFIGURARE in Task 3
+!
+end

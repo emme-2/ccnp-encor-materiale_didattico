@@ -1,0 +1,34 @@
+! MOD-27 cfg iniziale — R-ISP (Internet simulato)
+! Stato: IP configurati, routing statico verso pool NAT
+! DA CONFIGURARE in Task T4: ntp master 1 e autenticazione
+!
+hostname R-ISP
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.10
+ encapsulation dot1Q 10
+ ip address 203.0.113.1 255.255.255.252
+ description WAN_to_R-GW
+ no shutdown
+!
+interface Loopback0
+ ip address 8.8.8.8 255.255.255.255
+ description Simulated_Internet_Target
+ no shutdown
+!
+! Route verso il pool NAT pubblico (203.0.113.8/29):
+ip route 203.0.113.8 255.255.255.248 203.0.113.2
+! Route verso la LAN interna (per test static NAT bidirezionale):
+ip route 192.168.1.0 255.255.255.0 203.0.113.2
+!
+! NTP: DA CONFIGURARE in Task T4
+! ntp master 1
+! ntp authenticate
+! ntp authentication-key 1 md5 CISCO123
+! ntp trusted-key 1
+!
+end

@@ -1,0 +1,40 @@
+! MOD-07 cfg iniziale — R5 (AS 65002 — eBGP peer esterno)
+! Stato: eBGP verso R1, annuncia 5.5.5.5/32 e 172.16.0.0/16
+! Task T3: aggiungi address-family ipv6 e annuncio 2001:db8:5::5/128
+!
+hostname R5
+no ip domain-lookup
+ipv6 unicast-routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.15
+ encapsulation dot1Q 15
+ ip address 172.16.15.2 255.255.255.252
+ description eBGP_to_R1_AS65001
+ no shutdown
+!
+interface Loopback0
+ ip address 5.5.5.5 255.255.255.255
+ ipv6 address 2001:db8:5::5/128
+ description Router_ID_AS65002
+ no shutdown
+!
+! Route statica per poter annunciare aggregate 172.16.0.0/16:
+ip route 172.16.0.0 255.255.0.0 Null0
+!
+router bgp 65002
+ bgp router-id 5.5.5.5
+ neighbor 172.16.15.1 remote-as 65001
+ !
+ address-family ipv4
+  neighbor 172.16.15.1 activate
+  network 5.5.5.5 mask 255.255.255.255
+  network 172.16.0.0 mask 255.255.0.0
+ exit-address-family
+ !
+ ! address-family ipv6 -- DA CONFIGURARE in Task 3
+!
+end

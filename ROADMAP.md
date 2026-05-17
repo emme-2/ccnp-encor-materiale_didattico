@@ -7,10 +7,10 @@
 
 ## Stato Complessivo
 
-- **Completati:** 24 / 35 moduli (MOD-01/02/03/04/05/06 + MOD-10–20 + MOD-26/28/29/32–35)
+- **Completati:** 28 / 35 moduli (MOD-01/02/03/04/05/06/07 + MOD-10–20 + MOD-26/27/28/29/30/31/32–35)
 - **In sviluppo:** 0
-- **Placeholder con sorgente:** 5 / 35 (MOD-07, 08, 09, 27, 30/31)
-- **Da sviluppare ex-novo:** 7 / 35
+- **Placeholder con sorgente:** 2 / 35 (MOD-08, 09)
+- **Da sviluppare ex-novo:** 5 / 35
 
 ---
 
@@ -24,6 +24,10 @@
 | ~~MOD-04~~ | OSPF Troubleshooting | ✅ COMPLETO | 2026-05-16 |
 | ~~MOD-05~~ | BGP Fondamenta | ✅ COMPLETO | 2026-05-14 |
 | ~~MOD-06~~ | BGP Traffic Engineering | ✅ COMPLETO | 2026-05-14 |
+| ~~MOD-07~~ | BGP Route Reflector & IPv6 BGP | ✅ COMPLETO | 2026-05-17 |
+| ~~MOD-27~~ | NAT/PAT & NTP | ✅ COMPLETO | 2026-05-17 |
+| ~~MOD-30~~ | Device Security & AAA | ✅ COMPLETO | 2026-05-17 |
+| ~~MOD-31~~ | ACL & CoPP | ✅ COMPLETO | 2026-05-17 |
 
 ---
 
@@ -31,11 +35,12 @@
 
 | MOD | Titolo | Mancante | Priorità |
 |-----|--------|----------|----------|
-| ~~MOD-04~~ | ~~OSPF Troubleshooting~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-16 |
-| MOD-07 | BGP Route Reflector & IPv6 BGP | tutto (ex-novo) | Alta — dipendenze MOD-05/06 ora soddisfatte |
+| ~~MOD-07~~ | ~~BGP Route Reflector & IPv6 BGP~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
+| ~~MOD-27~~ | ~~NAT, PAT & NTP~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
+| ~~MOD-30~~ | ~~Device Security & AAA~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
+| ~~MOD-31~~ | ~~ACL & CoPP~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
 | MOD-08 | Route Manipulation & PBR | tutto (ex-novo) | Alta — gap critico syllabus |
 | MOD-09 | Redistribuzione & Loop Prevention | tutto (ex-novo) | Media — dipende MOD-08 |
-| MOD-27 | NAT, PAT & NTP | tutto (ex-novo) | Media |
 
 ---
 
@@ -70,11 +75,16 @@ Ordinati per impatto esame:
 | 2026-05-14 | MOD-05 | Completato: soluzione.md (T1–T6) + cfg r1–r6 (eBGP R3↔R5 mancante in cfg) |
 | 2026-05-14 | MOD-06 | Completato: soluzione.md (T7–T-EXTRA) + cfg r1–r6 (stato finale MOD-05) |
 | 2026-05-16 | MOD-04 | Completato ex-novo: workbook.md (11 task, scenari A/B/C/D) + soluzione.md + cfg r1–r5 (9 errori intenzionali) |
+| 2026-05-17 | MOD-07 | Completato ex-novo: workbook.md (T1-T3) + soluzione.md + cfg r1–r5 (full-mesh AS65001 + R5 AS65002) |
+| 2026-05-17 | MOD-27 | Completato ex-novo: workbook.md (T1-T5) + soluzione.md + cfg r-isp/r-gw/pc1/pc2 |
+| 2026-05-17 | MOD-30 | Completato ex-novo: workbook.md (T1-T4) + soluzione.md + cfg r1/r2 (FreeRADIUS 192.168.122.100) |
+| 2026-05-17 | MOD-31 | Completato ex-novo: workbook.md (T1-T5) + soluzione.md + cfg r1/r2 (OSPF+SSH+ACL+CoPP) |
 
 ---
 
 ## Prossimi Passi (sessione successiva)
 
-1. **MOD-07** — BGP Route Reflector (ex-novo, dipende da MOD-05/06 ora completi)
-2. **MOD-08** — Route Manipulation & PBR (ex-novo, gap critico syllabus)
-3. **MOD-09** — Redistribuzione & Loop Prevention (dipende da MOD-08)
+1. **MOD-08** — Route Manipulation & PBR (ex-novo, gap critico syllabus — 0% copertura)
+2. **MOD-09** — Redistribuzione & Loop Prevention (dipende da MOD-08)
+3. **MOD-21/22** — SD-WAN / SD-Access (solo teoria, demo dCloud)
+4. **MOD-23/24/25** — Wireless (teoria + simulatore)

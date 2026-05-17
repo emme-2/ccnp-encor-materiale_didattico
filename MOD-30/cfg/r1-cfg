@@ -1,0 +1,42 @@
+! MOD-30 cfg iniziale — R1 (NAS da hardening)
+! RADIUS server: 192.168.122.100
+! Modifica questo IP se l'ambiente e' diverso
+!
+! Stato: IP configurati, nessuna password, nessun SSH, nessuna AAA
+! Task T1: hardening (enable secret, SSH v2, banner, VTY)
+! Task T2: AAA locale (aaa new-model, username, authentication, authorization)
+! Task T3: RADIUS con fallback locale
+! Task T4: privilege levels RBAC
+!
+hostname R1
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.12.0.1 255.255.255.252
+ description Lab_to_R2
+ no shutdown
+!
+! Interfaccia management verso FreeRADIUS (virbr0):
+interface Ethernet0/1
+ ip address 192.168.122.10 255.255.255.0
+ description Management_to_RADIUS
+ no shutdown
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+! Accesso console base (senza password — da hardening in T1):
+line console 0
+ logging synchronous
+!
+! VTY aperto senza restrizioni — da hardening in T1:
+line vty 0 4
+ transport input all
+!
+end
