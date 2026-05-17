@@ -1,0 +1,28 @@
+hostname LAN-B
+!
+no ip domain-lookup
+!
+interface Loopback0
+ ip address 10.255.0.5 255.255.255.255
+ ip ospf 1 area 0
+!
+interface Loopback1
+ ip address 10.20.0.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 1 area 0
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.35
+ encapsulation dot1Q 35
+ ip address 10.0.35.2 255.255.255.252
+ description to_CORE
+ ip ospf 1 area 0
+!
+router ospf 1
+ router-id 10.255.0.5
+ passive-interface Loopback0
+ passive-interface Loopback1
+!
+end

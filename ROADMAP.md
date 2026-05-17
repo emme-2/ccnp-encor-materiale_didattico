@@ -7,10 +7,10 @@
 
 ## Stato Complessivo
 
-- **Completati:** 28 / 35 moduli (MOD-01/02/03/04/05/06/07 + MOD-10–20 + MOD-26/27/28/29/30/31/32–35)
+- **Completati:** 30 / 35 moduli (MOD-01/02/03/04/05/06/07/08/09 + MOD-10–20 + MOD-26/27/28/29/30/31/32–35)
 - **In sviluppo:** 0
-- **Placeholder con sorgente:** 2 / 35 (MOD-08, 09)
-- **Da sviluppare ex-novo:** 5 / 35
+- **Placeholder con sorgente:** 0 / 35
+- **Da sviluppare ex-novo:** 5 / 35 (MOD-21/22/23/24/25)
 
 ---
 
@@ -18,6 +18,8 @@
 
 | MOD | Titolo | Stato | Data |
 |-----|--------|-------|------|
+| ~~MOD-08~~ | Redistribuzione BGP↔OSPF & Prefix Filtering | ✅ COMPLETO | 2026-05-17 |
+| ~~MOD-09~~ | PBR & Route Manipulation Avanzata | ✅ COMPLETO | 2026-05-17 |
 | ~~MOD-01~~ | OSPFv2 Fondamenta | ✅ COMPLETO | 2026-05-14 |
 | ~~MOD-02~~ | OSPFv2 Aree & Summarization | ✅ COMPLETO | 2026-05-14 |
 | ~~MOD-03~~ | OSPFv3 Dual-Stack | ✅ COMPLETO | 2026-05-14 |
@@ -39,8 +41,8 @@
 | ~~MOD-27~~ | ~~NAT, PAT & NTP~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
 | ~~MOD-30~~ | ~~Device Security & AAA~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
 | ~~MOD-31~~ | ~~ACL & CoPP~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
-| MOD-08 | Route Manipulation & PBR | tutto (ex-novo) | Alta — gap critico syllabus |
-| MOD-09 | Redistribuzione & Loop Prevention | tutto (ex-novo) | Media — dipende MOD-08 |
+| ~~MOD-08~~ | ~~Redistribuzione BGP↔OSPF & Prefix Filtering~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
+| ~~MOD-09~~ | ~~PBR & Route Manipulation Avanzata~~ | ~~tutto~~ | ✅ COMPLETATO 2026-05-17 |
 
 ---
 
@@ -79,12 +81,13 @@ Ordinati per impatto esame:
 | 2026-05-17 | MOD-27 | Completato ex-novo: workbook.md (T1-T5) + soluzione.md + cfg r-isp/r-gw/pc1/pc2 |
 | 2026-05-17 | MOD-30 | Completato ex-novo: workbook.md (T1-T4) + soluzione.md + cfg r1/r2 (FreeRADIUS 192.168.122.100) |
 | 2026-05-17 | MOD-31 | Completato ex-novo: workbook.md (T1-T5) + soluzione.md + cfg r1/r2 (OSPF+SSH+ACL+CoPP) |
+| 2026-05-17 | MOD-08 | Completato ex-novo: workbook.md (T1-T5) + soluzione.md + cfg 7 device (ISP-A/B, WAN-A/B, CORE, LAN-A/B) |
+| 2026-05-17 | MOD-09 | Completato ex-novo: workbook.md (T1/T2/T3A/B/C/T4) + soluzione.md + cfg 7 device (stato finale MOD-08) |
 
 ---
 
 ## Prossimi Passi (sessione successiva)
 
-1. **MOD-08** — Route Manipulation & PBR (ex-novo, gap critico syllabus — 0% copertura)
-2. **MOD-09** — Redistribuzione & Loop Prevention (dipende da MOD-08)
-3. **MOD-21/22** — SD-WAN / SD-Access (solo teoria, demo dCloud)
-4. **MOD-23/24/25** — Wireless (teoria + simulatore)
+1. **MOD-21/22** — SD-WAN / SD-Access (solo teoria, demo dCloud)
+2. **MOD-23/24/25** — Wireless (teoria + simulatore/hardware esterno)
+3. **Slide deck** — MOD-08/09 mancano di slide.pptx (bassa priorità, dopo teoria)

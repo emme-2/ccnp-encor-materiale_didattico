@@ -1,0 +1,28 @@
+hostname ISP-B
+!
+no ip domain-lookup
+!
+interface Loopback0
+ ip address 200.0.0.1 255.255.255.255
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.26
+ encapsulation dot1Q 26
+ ip address 10.0.26.1 255.255.255.252
+ description to_WAN-B
+!
+ip route 200.0.0.0 255.0.0.0 Null0
+!
+router bgp 200
+ bgp router-id 200.0.0.1
+ no bgp default ipv4-unicast
+ neighbor 10.0.26.2 remote-as 65002
+ !
+ address-family ipv4
+  neighbor 10.0.26.2 activate
+  network 200.0.0.0
+ exit-address-family
+!
+end

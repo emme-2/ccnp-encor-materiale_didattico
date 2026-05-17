@@ -15,8 +15,8 @@
 | MOD-05 | BGP Fondamenta | Routing | ✅ | ✅ | ✅ | ✅ |
 | MOD-06 | BGP Traffic Engineering | Routing | ✅ | ✅ | ✅ | ✅ |
 | MOD-07 | BGP Route Reflector & IPv6 BGP | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-08 | Route Manipulation & PBR | Routing | ⬜ | ⬜ | ⬜ | ❌ |
-| MOD-09 | Redistribuzione & Loop Prevention | Routing | ⬜ | ⬜ | ⬜ | ❌ |
+| MOD-08 | Redistribuzione BGP↔OSPF & Prefix Filtering | Routing | ✅ | ✅ | ✅ | ✅ |
+| MOD-09 | PBR & Route Manipulation Avanzata | Routing | ✅ | ✅ | ✅ | ✅ |
 | MOD-10 | MPLS LDP & Fondamenta | MPLS | ✅ | ✅ | ✅ | ✅ |
 | MOD-11 | MPLS L3VPN | MPLS | ✅ | ✅ | ✅ | ✅ |
 | MOD-12 | MPLS L2VPN (AToM) | MPLS | ✅ | ✅ | ✅ | ✅ |
@@ -50,7 +50,7 @@
 
 ---
 
-## Moduli Consegnabili MVP — 23 moduli
+## Moduli Consegnabili MVP — 30 moduli
 
 Pronti per consegna immediata agli studenti (workbook + soluzione + cfg):
 
@@ -83,6 +83,8 @@ Pronti per consegna immediata agli studenti (workbook + soluzione + cfg):
 | **MOD-27** | NAT/PAT & NTP | `MOD-27/cfg/` — r-isp-cfg · r-gw-cfg · pc1-cfg · pc2-cfg |
 | **MOD-30** | Device Security & AAA | `MOD-30/cfg/` — r1-cfg · r2-cfg (FreeRADIUS: 192.168.122.100) |
 | **MOD-31** | ACL & CoPP | `MOD-31/cfg/` — r1-cfg · r2-cfg |
+| **MOD-08** | Redistribuzione BGP↔OSPF & Prefix Filtering | `MOD-08/cfg/` — ispa-cfg · ispb-cfg · wana-cfg · wanb-cfg · core-cfg · lana-cfg · lanb-cfg |
+| **MOD-09** | PBR & Route Manipulation Avanzata | `MOD-09/cfg/` — ispa-cfg · ispb-cfg · wana-cfg · wanb-cfg · core-cfg · lana-cfg · lanb-cfg (stato finale MOD-08) |
 
 ---
 
@@ -155,8 +157,8 @@ Moduli al momento non sviluppati (solo struttura placeholder):
 | ~~MOD-27~~ | ~~NAT/PAT & NTP~~ | ✅ Completato 2026-05-17 |
 | ~~MOD-30~~ | ~~Device Security & AAA~~ | ✅ Completato 2026-05-17 |
 | ~~MOD-31~~ | ~~ACL & CoPP~~ | ✅ Completato 2026-05-17 |
-| MOD-08 | Route Manipulation & PBR | Gap critico syllabus — 0% materiale; alta priorità roadmap |
-| MOD-09 | Redistribuzione | Dipende da MOD-08; sviluppo successivo |
+| ~~MOD-08~~ | ~~Redistribuzione BGP↔OSPF & Prefix Filtering~~ | ✅ Completato 2026-05-17 |
+| ~~MOD-09~~ | ~~PBR & Route Manipulation Avanzata~~ | ✅ Completato 2026-05-17 |
 | MOD-21 | SD-WAN | Solo demo dCloud; nessun lab GNS3 possibile |
 | MOD-22 | SD-Access | Solo demo dCloud; coperto parzialmente in MOD-20 |
 | MOD-23 | Wireless RF | Richiede hardware reale o emulatore; assente dal corso 2026 |

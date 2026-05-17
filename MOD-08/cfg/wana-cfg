@@ -1,0 +1,38 @@
+hostname WAN-A
+!
+no ip domain-lookup
+!
+interface Loopback0
+ ip address 10.255.0.2 255.255.255.255
+ ip ospf 1 area 0
+!
+interface Ethernet0/0
+ no shutdown
+!
+interface Ethernet0/0.15
+ encapsulation dot1Q 15
+ ip address 10.0.15.2 255.255.255.252
+ description to_ISP-A
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ description to_CORE
+ ip ospf 1 area 0
+!
+router ospf 1
+ router-id 10.255.0.2
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 10.255.0.2
+ no bgp default ipv4-unicast
+ neighbor 10.0.15.1 remote-as 100
+ neighbor 10.0.12.2 remote-as 65000
+ !
+ address-family ipv4
+  neighbor 10.0.15.1 activate
+  neighbor 10.0.12.2 activate
+ exit-address-family
+!
+end
