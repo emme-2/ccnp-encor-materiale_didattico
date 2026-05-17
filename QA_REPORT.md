@@ -40,8 +40,8 @@ Passaggio QA + uniformazione eseguito in autonomia su tutti i workbook LAB (MOD-
 | MOD-15 | ✅ (sessione precedente) | ✅ (sessione precedente) | ✅ (sessione precedente) | R1/SW1/SW2 |
 | MOD-16 | ✅ (sessione precedente) | ✅ (sessione precedente) | ✅ (sessione precedente) | SW1/SW2 |
 | MOD-17 | ✅ questa sessione | ✅ questa sessione | ✅ questa sessione | 4 device: ISP/HUB/SP1/SP2 |
-| MOD-18 | ✅ questa sessione | ⚠️ BLOCCANTE | ✅ questa sessione | Nessun cfg proprio: usa MOD-17 |
-| MOD-19 | ✅ questa sessione | ⚠️ BLOCCANTE | ✅ questa sessione | Nessun cfg proprio: usa MOD-17/18 |
+| MOD-18 | ✅ questa sessione | ✅ 2026-05-17 | ✅ questa sessione | 4 cfg: snapshot fine MOD-17 (Parts 1-3), no IPSec |
+| MOD-19 | ✅ questa sessione | ✅ 2026-05-17 | ✅ questa sessione | 4 cfg: snapshot fine MOD-18 (GRE+IPSec completo) |
 | MOD-26 | ✅ questa sessione | ✅ questa sessione | ✅ questa sessione | R1 (QoS) |
 | MOD-27 | ✅ (sessione precedente) | ✅ (sessione precedente) | ✅ (sessione precedente) | 4 device |
 | MOD-28 | ✅ questa sessione | ✅ questa sessione | ✅ questa sessione | 5 device: R1–R5 |
@@ -62,32 +62,36 @@ Passaggio QA + uniformazione eseguito in autonomia su tutti i workbook LAB (MOD-
 | A05 | MOD-17 | B2 | SP1-cfg con BUG-1/BUG-2/BUG-3; SP2-cfg con BUG-4 + IKEv2 reference | Incluso nel cfg inline con commenti "BUG" sulla riga di descrizione |
 | A06 | MOD-18 | B2 | Sezione TFTP riferiva cfg MOD-17 (non MOD-18 specifici) | Aggiornato cross-reference a "Sezione 3 di MOD-17/workbook.md" |
 | A07 | MOD-26 | B3 | ASCII art con caratteri speciali `──── ` non standard | Sostituita con Mermaid `flowchart LR` |
+| A08 | MOD-18 | B2 | Nessun cfg standalone — dipendenza da MOD-17 | Creati 4 cfg: snapshot finale MOD-17 Parts 1-3 (CUST-B fixed, CUST-A GRE P2P, no IPSec) |
+| A09 | MOD-19 | B2 | Nessun cfg standalone — dipendenza da MOD-18 | Creati 4 cfg: snapshot finale MOD-18 (tutto MOD-18 + IKEv2/IPSec su HUB e SP1) |
 
 ---
 
 ## Anomalie Umane — BLOCCANTE
 
-Le seguenti anomalie richiedono intervento umano e non possono essere risolte automaticamente:
-
 ### BLK-01 — MOD-18: Nessun cfg standalone
 
-**Stato:** MOD-18 non ha cfg propri in `MOD-18/cfg/`. La directory contiene solo un `README.md`.
+**Stato:** ✅ RISOLTO — 2026-05-17
 
-**Causa:** MOD-18 (IPSec IKEv2) parte dallo stato finale di MOD-17 e aggiunge solo configurazioni IPSec. I cfg di partenza sono gli stessi di MOD-17.
+**Soluzione applicata:** Creati `MOD-18/cfg/isp-cfg`, `hub-cfg`, `sp1-cfg`, `sp2-cfg` come snapshot dello stato finale di MOD-17 (Parts 1-3 completi): CUST-B bugs 1+2 corretti, CUST-A configurato con VRF + Lo1 + Tu101/Tu102 GRE P2P + route statiche. Nessun IPSec (configurato dagli studenti in MOD-18). Tu210 CUST-B conserva i bug di DMVPN (corretti in MOD-19).
 
-**Impatto:** B2 non completabile (nessun contenuto da inlineare). La sezione Lab Setup è stata aggiornata con riferimento cross-module a `MOD-17/workbook.md Sezione 3`.
-
-**Raccomandazione:** Creare `MOD-18/cfg/hub-cfg` / `sp1-cfg` / `sp2-cfg` / `isp-cfg` come snapshot dello stato finale di MOD-17 (VRF + GRE + route statiche, senza IPSec). Questo permetterebbe agli studenti di iniziare MOD-18 senza dipendenza da MOD-17 completato.
+**Contenuto MOD-18/cfg:**
+- `isp-cfg` — invariato da MOD-17
+- `hub-cfg` — CUST-B bug-1/2 corretti, CUST-A completo, Tu210 bug-3 presente, no IPSec
+- `sp1-cfg` — CUST-B bug-1/2 corretti, CUST-A (Tu101 + Lo1), Tu210 bug-3 presente, no IPSec
+- `sp2-cfg` — CUST-B corretto, CUST-A con IKEv2/IPSec reference (pre-configurato), route statiche CUST-A aggiunte
 
 ### BLK-02 — MOD-19: Nessun cfg standalone
 
-**Stato:** MOD-19 non ha cfg propri in `MOD-19/cfg/`. La directory contiene solo un `README.md`.
+**Stato:** ✅ RISOLTO — 2026-05-17
 
-**Causa:** MOD-19 (DMVPN) parte dallo stato finale di MOD-18 (GRE + IPSec). La progressione è intenzionale.
+**Soluzione applicata:** Creati `MOD-19/cfg/isp-cfg`, `hub-cfg`, `sp1-cfg`, `sp2-cfg` come snapshot dello stato finale di MOD-18: tutto il contenuto di MOD-18/cfg + IKEv2/IPSec completo su HUB e SP1 + `tunnel protection ipsec profile IPSEC-PROF` applicato su Tu101 (SP1) e Tu101/Tu102 (HUB). SP2 invariato (aveva già IPSec). Tu210 CUST-B conserva i bug di DMVPN (corretti in MOD-19 T5.9).
 
-**Impatto:** B2 non completabile. La sezione Lab Setup descrive come prerequisito "MOD-18 completato" senza cfg di partenza propri.
-
-**Raccomandazione:** Creare `MOD-19/cfg/` come snapshot dello stato finale di MOD-18 (VRF + GRE P2P + IPSec) come cfg di partenza. Alternativa: mantenere la dipendenza e documentarla esplicitamente come "modulo sequenziale" nel MAPPATURA_LAB.md.
+**Contenuto MOD-19/cfg:**
+- `isp-cfg` — invariato da MOD-17
+- `hub-cfg` — tutto di MOD-18 + crypto ikev2/ipsec completo + tunnel protection su Tu101/Tu102, Tu210 bug-3 presente
+- `sp1-cfg` — tutto di MOD-18 + crypto ikev2/ipsec completo + tunnel protection su Tu101, Tu210 bug-3 presente
+- `sp2-cfg` — identico a MOD-18/sp2-cfg (SP2 non modificato in MOD-18)
 
 ---
 
@@ -95,7 +99,7 @@ Le seguenti anomalie richiedono intervento umano e non possono essere risolte au
 
 | Gap | Descrizione | Priorità |
 |-----|-------------|----------|
-| G01 | MOD-18/19: nessun cfg standalone (vedi BLK-01/02) | Alta |
+| G01 | MOD-18/19: nessun cfg standalone | ✅ Risolto 2026-05-17 |
 | G02 | MOD-21/22/23/24/25: non sviluppati (wireless/SD-WAN) | Bassa — fuori scope MVP |
 | G03 | Slide .pptx: nessun modulo ha il deck slide generato | Media — Fase 3 WBS |
 | G04 | MAPPATURA_LAB.md usa nomenclatura LAB0x (vecchia): non aggiornata alla struttura MOD-xx | Media |
@@ -129,4 +133,4 @@ I seguenti moduli coprono diversi tipi di topologia e complessità — raccomand
 
 ---
 
-*Fine QA_REPORT.md — 2026-05-17*
+*Aggiornato 2026-05-17 — BLK-01/02 risolti, G01 chiuso, A08/A09 aggiunte*

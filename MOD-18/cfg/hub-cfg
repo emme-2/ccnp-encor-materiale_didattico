@@ -1,0 +1,127 @@
+! =============================================================================
+! CCNP ENCOR 350-401 — MOD-18: IPSec IKEv2 & VTI
+! Router: HUB
+! Role:   DMVPN Hub / VRF PE
+! Snapshot: Fine MOD-17 (Parts 1-3 completi)
+! =============================================================================
+! STATO CUST-B:
+!   Bug-1 CORRETTO — Lo2 ip address 10.2.1.1 (era 10.2.2.1)
+!   Bug-2 CORRETTO — Tu202 tunnel source Loopback0 (era Ethernet0/0.10)
+!   Tu210 BUG-3 ANCORA PRESENTE — manca tunnel mode gre multipoint (fix in MOD-19 T5.9)
+! STATO CUST-A:
+!   Configurato dagli studenti in MOD-17: VRF + Lo1 + Tu101/Tu102 GRE P2P + route statiche
+! NON PRESENTE:
+!   IPSec/IKEv2 — configurato dagli studenti in MOD-18
+!   Tu110 DMVPN CUST-A — configurato dagli studenti in MOD-19
+! =============================================================================
+
+hostname HUB
+
+! -----------------------------------------------------------------------------
+! UNDERLAY — global table
+! -----------------------------------------------------------------------------
+interface Loopback0
+ description !! Tunnel source — global table
+ ip address 192.0.2.254 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.10
+ description !! ISP link — VLAN 10 — 192.0.2.0/30
+ encapsulation dot1Q 10
+ ip address 192.0.2.2 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 192.0.2.1
+
+! =============================================================================
+! VRF CUST-B — bug 1 e 2 corretti dagli studenti in MOD-17 Parts 1-2
+! =============================================================================
+vrf definition CUST-B
+ description !! Customer B
+ rd 2:1
+ address-family ipv4
+ exit-address-family
+!
+! [Bug-1 CORRETTO] Lo2: IP corretto 10.2.1.1 (HUB assignment)
+interface Loopback2
+ description !! VRF CUST-B customer loopback
+ vrf forwarding CUST-B
+ ip address 10.2.1.1 255.255.255.255
+!
+! Tu201 — corretto (era gia' corretto)
+interface Tunnel201
+ description !! GRE CUST-B HUB<->SP1
+ vrf forwarding CUST-B
+ ip address 172.16.201.1 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 198.51.100.254
+ tunnel mode gre ip
+ no shutdown
+!
+! [Bug-2 CORRETTO] Tu202: tunnel source Loopback0 (era Ethernet0/0.10)
+interface Tunnel202
+ description !! GRE CUST-B HUB<->SP2
+ vrf forwarding CUST-B
+ ip address 172.16.202.1 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 203.0.113.254
+ tunnel mode gre ip
+ no shutdown
+!
+ip route vrf CUST-B 10.2.2.1 255.255.255.255 Tunnel201
+ip route vrf CUST-B 10.2.3.1 255.255.255.255 Tunnel202
+!
+! Tu210 CUST-B — BUG-3 ANCORA PRESENTE (manca tunnel mode gre multipoint)
+! Gli studenti trovano e correggono questo bug in MOD-19 Task T5.9
+interface Tunnel210
+ description !! DMVPN CUST-B cloud — HUB — BUG: missing tunnel mode gre multipoint
+ vrf forwarding CUST-B
+ ip address 172.16.210.1 255.255.255.0
+ tunnel source Loopback0
+ ! tunnel mode gre multipoint  <-- INTENTIONALLY OMITTED (BUG-3 — fix in MOD-19)
+ ip nhrp network-id 210
+ ip nhrp map multicast dynamic
+ ip nhrp redirect
+ no shutdown
+
+! =============================================================================
+! VRF CUST-A — configurato dagli studenti in MOD-17 Parts 1-3
+! =============================================================================
+vrf definition CUST-A
+ description !! Customer A
+ rd 1:1
+ address-family ipv4
+ exit-address-family
+!
+interface Loopback1
+ description !! VRF CUST-A customer loopback
+ vrf forwarding CUST-A
+ ip address 10.1.1.1 255.255.255.255
+!
+interface Tunnel101
+ description !! GRE CUST-A HUB<->SP1 — senza IPSec (aggiunto in MOD-18)
+ vrf forwarding CUST-A
+ ip address 172.16.101.1 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 198.51.100.254
+ tunnel mode gre ip
+ no shutdown
+!
+interface Tunnel102
+ description !! GRE CUST-A HUB<->SP2 — senza IPSec (aggiunto in MOD-18)
+ vrf forwarding CUST-A
+ ip address 172.16.102.1 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 203.0.113.254
+ tunnel mode gre ip
+ no shutdown
+!
+ip route vrf CUST-A 10.1.2.1 255.255.255.255 Tunnel101
+ip route vrf CUST-A 10.1.3.1 255.255.255.255 Tunnel102
+!
+! VERIFY pre-lab MOD-18:
+!   ping 198.51.100.2            ! SP1 underlay
+!   ping 203.0.113.2             ! SP2 underlay
+!   ping vrf CUST-A 10.1.2.1 source Loopback1  ! SP1 Lo1
+!   ping vrf CUST-A 10.1.3.1 source Loopback1  ! SP2 Lo1
+!   show crypto ikev2 sa         ! atteso: vuoto
+end

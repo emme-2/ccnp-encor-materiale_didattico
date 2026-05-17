@@ -1,0 +1,38 @@
+! =============================================================================
+! CCNP ENCOR 350-401 — MOD-18: IPSec IKEv2 & VTI
+! Router: ISP
+! Role:   Simulated Internet — global table only, no VRF
+! Snapshot: Fine MOD-17 — invariato (ISP non cambia nelle sessioni MOD-17/18/19)
+! =============================================================================
+
+hostname ISP
+
+interface Loopback0
+ description !! ISP management loopback
+ ip address 192.0.2.253 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.10
+ description !! ISP <-> HUB — VLAN 10 (192.0.2.0/30)
+ encapsulation dot1Q 10
+ ip address 192.0.2.1 255.255.255.252
+!
+interface Ethernet0/0.20
+ description !! ISP <-> SP1 — VLAN 20 (198.51.100.0/30)
+ encapsulation dot1Q 20
+ ip address 198.51.100.1 255.255.255.252
+!
+interface Ethernet0/0.30
+ description !! ISP <-> SP2 — VLAN 30 (203.0.113.0/30)
+ encapsulation dot1Q 30
+ ip address 203.0.113.1 255.255.255.252
+!
+ip route 192.0.2.254 255.255.255.255 192.0.2.2
+ip route 198.51.100.254 255.255.255.255 198.51.100.2
+ip route 203.0.113.254 255.255.255.255 203.0.113.2
+!
+! VERIFY:
+!   ping 192.0.2.254    ! HUB Lo0
+!   ping 198.51.100.254 ! SP1 Lo0
+!   ping 203.0.113.254  ! SP2 Lo0
+end

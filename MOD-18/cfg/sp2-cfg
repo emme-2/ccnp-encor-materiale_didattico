@@ -1,0 +1,147 @@
+! =============================================================================
+! CCNP ENCOR 350-401 — MOD-18: IPSec IKEv2 & VTI
+! Router: SP2 (Spoke 2)
+! Role:   DMVPN Spoke / VRF CE  —  IPSec REFERENCE (pre-configurato)
+! Snapshot: Fine MOD-17 (Parts 1-3 completi)
+! =============================================================================
+! STATO CUST-B:
+!   Sempre corretto (SP2 non aveva bug in CUST-B non-Tu210)
+!   Tu210 BUG-4 ANCORA PRESENTE — nhrp nhs 172.16.210.2 (fix in MOD-19 T5.9)
+! STATO CUST-A:
+!   Pre-configurato in MOD-17 (reference per Part 4): Lo1 + Tu102 GRE + IKEv2 + IPSec
+!   Route statiche CUST-A: configurate dagli studenti in MOD-17 Part 3
+! NOTA PER DOCENTE:
+!   SP2 NON viene modificato durante MOD-18 — e' il reference che gli studenti esaminano
+!   prima di configurare HUB e SP1
+! =============================================================================
+
+hostname SP2
+
+! -----------------------------------------------------------------------------
+! UNDERLAY — global table
+! -----------------------------------------------------------------------------
+interface Loopback0
+ description !! Tunnel source — global table
+ ip address 203.0.113.254 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.30
+ description !! ISP link — VLAN 30 — 203.0.113.0/30
+ encapsulation dot1Q 30
+ ip address 203.0.113.2 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 203.0.113.1
+
+! =============================================================================
+! VRF CUST-B — sempre corretto su SP2
+! =============================================================================
+vrf definition CUST-B
+ description !! Customer B — corretto su SP2
+ rd 2:3
+ address-family ipv4
+ exit-address-family
+!
+interface Loopback2
+ description !! VRF CUST-B customer loopback
+ vrf forwarding CUST-B
+ ip address 10.2.3.1 255.255.255.255
+!
+interface Tunnel202
+ description !! GRE CUST-B SP2<->HUB
+ vrf forwarding CUST-B
+ ip address 172.16.202.2 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 192.0.2.254
+ tunnel mode gre ip
+ no shutdown
+!
+ip route vrf CUST-B 10.2.1.1 255.255.255.255 Tunnel202
+ip route vrf CUST-B 10.2.2.1 255.255.255.255 Tunnel202
+!
+! Tu210 CUST-B — BUG-4 ANCORA PRESENTE (nhrp nhs .2 invece di .1)
+! Gli studenti trovano e correggono questo bug in MOD-19 Task T5.9
+interface Tunnel210
+ description !! DMVPN CUST-B cloud — SP2 spoke — BUG: wrong NHS IP
+ vrf forwarding CUST-B
+ ip address 172.16.210.12 255.255.255.0
+ tunnel source Loopback0
+ tunnel mode gre multipoint
+ ip nhrp network-id 210
+ ip nhrp nhs 172.16.210.2
+ ip nhrp map 172.16.210.2 203.0.113.254
+ ip nhrp map multicast 203.0.113.254
+ ip nhrp shortcut
+ no shutdown
+
+! =============================================================================
+! VRF CUST-A — pre-configurato come reference per MOD-18 Part 4
+! =============================================================================
+vrf definition CUST-A
+ description !! Customer A — SP2 pre-configurato come IPSec reference
+ rd 1:3
+ address-family ipv4
+ exit-address-family
+!
+interface Loopback1
+ description !! VRF CUST-A customer loopback
+ vrf forwarding CUST-A
+ ip address 10.1.3.1 255.255.255.255
+!
+! Tu102 — GRE CUST-A con tunnel protection gia' applicata (reference per T4.1)
+interface Tunnel102
+ description !! GRE CUST-A SP2<->HUB — REFERENCE: IPSec pre-applicata
+ vrf forwarding CUST-A
+ ip address 172.16.102.2 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 192.0.2.254
+ tunnel mode gre ip
+ tunnel protection ipsec profile IPSEC-PROF
+ no shutdown
+!
+! Route statiche CUST-A — configurate dagli studenti in MOD-17 Part 3
+ip route vrf CUST-A 10.1.1.1 255.255.255.255 Tunnel102
+ip route vrf CUST-A 10.1.2.1 255.255.255.255 Tunnel102
+
+! =============================================================================
+! IPSEC / IKEv2 — pre-configurato come reference (esaminato in T4.1)
+! =============================================================================
+crypto ikev2 proposal PROP-ENCOR
+ encryption aes-cbc-256
+ integrity sha256
+ group 14
+!
+crypto ikev2 policy POL-ENCOR
+ proposal PROP-ENCOR
+!
+crypto ikev2 keyring KR-ENCOR
+ peer HUB
+  address 192.0.2.254
+  pre-shared-key cisco123
+ !
+ peer SP1
+  address 198.51.100.254
+  pre-shared-key cisco123
+!
+crypto ikev2 profile PROF-ENCOR
+ match identity remote address 192.0.2.254 255.255.255.255
+ match identity remote address 198.51.100.254 255.255.255.255
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local KR-ENCOR
+!
+crypto ipsec transform-set TS-ENCOR esp-aes 256 esp-sha256-hmac
+ mode tunnel
+!
+crypto ipsec profile IPSEC-PROF
+ set transform-set TS-ENCOR
+ set ikev2-profile PROF-ENCOR
+!
+! VERIFY (reference per T4.1):
+!   show crypto ikev2 proposal
+!   show crypto ikev2 policy
+!   show crypto ikev2 keyring
+!   show crypto ikev2 profile
+!   show crypto ipsec transform-set
+!   show crypto ipsec profile
+!   show interface Tunnel102 | include protection
+end
