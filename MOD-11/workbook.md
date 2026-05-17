@@ -1,5 +1,8 @@
 ﻿# Workbook Studenti — MOD-11: MPLS L3VPN
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** AREA 4 — MPLS | **Ore:** 2h | **Codici syllabus:** 2.2
 **Prerequisito:** MOD-10 completato — LDP attivo su tutta la backbone (PE1, P1, P2, PE2).
 
@@ -9,17 +12,26 @@
 
 ### Diagramma logico
 
-```
-CE1 ─── PE1 ─── P1 ─── P2 ─── PE2 ─── CE2
-AS65001        backbone (AS65000)        AS65002
-
-Link L3VPN (aggiuntivi rispetto a MOD-10):
-  CE1 Eth0/0.11 ──── PE1 Eth0/0.11   192.168.1.0/30   [VRF CUST_A]
-  CE2 Eth0/0.22 ──── PE2 Eth0/0.22   192.168.2.0/30   [VRF CUST_A]
-
-Sessione MP-BGP iBGP: PE1 (1.1.1.1) ↔ PE2 (2.2.2.2)
-Sessione eBGP CE-PE:  CE1 AS65001 ↔ PE1 AS65000
-                      CE2 AS65002 ↔ PE2 AS65000
+```mermaid
+flowchart LR
+    subgraph CE1AS["AS 65001 — Customer A (CE1)"]
+        CE1["**CE1**\nLo0: 192.168.10.1/24\nEth0/0.11: 192.168.1.1/30"]
+    end
+    subgraph CORE["AS 65000 — MPLS backbone + VRF CUST_A"]
+        PE1["**PE1** — Provider Edge\nLo0: 1.1.1.1/32\nEth0/0.11: 192.168.1.2/30\n(VRF CUST_A)\nEth0/0.13: 10.0.13.1/30"]
+        P1["**P1** — Provider Core\nLo0: 3.3.3.3/32\nEth0/0.13: 10.0.13.2/30\nEth0/0.34: 10.0.34.1/30"]
+        P2["**P2** — Provider Core\nLo0: 4.4.4.4/32\nEth0/0.34: 10.0.34.2/30\nEth0/0.24: 10.0.24.1/30"]
+        PE2["**PE2** — Provider Edge\nLo0: 2.2.2.2/32\nEth0/0.24: 10.0.24.2/30\nEth0/0.22: 192.168.2.2/30\n(VRF CUST_A)"]
+        PE1 -->|"VLAN 13\n10.0.13.0/30\nOSPF+LDP"| P1
+        P1 -->|"VLAN 34\n10.0.34.0/30\nOSPF+LDP"| P2
+        P2 -->|"VLAN 24\n10.0.24.0/30\nOSPF+LDP"| PE2
+        PE1 <-->|"MP-BGP VPNv4 iBGP\nvia Lo0 1.1.1.1↔2.2.2.2"| PE2
+    end
+    subgraph CE2AS["AS 65002 — Customer A (CE2)"]
+        CE2["**CE2**\nLo0: 192.168.20.1/24\nEth0/0.22: 192.168.2.1/30"]
+    end
+    CE1 -->|"VLAN 11\n192.168.1.0/30\neBGP CE-PE"| PE1
+    PE2 -->|"VLAN 22\n192.168.2.0/30\neBGP PE-CE"| CE2
 ```
 
 ### Piano di indirizzamento
@@ -66,18 +78,257 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
 
-> **ATTENZIONE:** I file cfg TFTP non sono ancora disponibili.
-> Assicurarsi che il backbone da MOD-10 sia operativo (LDP Up su tutti i link)
-> e configurare manualmente i servizi VPN seguendo il workbook.
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+P1 e P2 sono identici allo stato finale di MOD-10 (MPLS LDP già configurato).
+
+#### PE1
 
 ```
-! Quando disponibili, caricare con:
-! copy tftp://192.168.122.1/ENCOR/MOD-11/pe1-cfg  running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-11/pe2-cfg  running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-11/ce1-cfg  running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-11/ce2-cfg  running-config
+! MOD-11 — PE1 (Provider Edge 1)
+! Stato iniziale: MOD-10 completato (OSPF + MPLS LDP up)
+! Interfaccia CE1 pre-configurata con IP ma SENZA VRF
+! Lo studente configura: ip vrf CUST_A, ip vrf forwarding, MP-BGP VPNv4, eBGP CE-PE
+! NOTA: quando si esegue "ip vrf forwarding CUST_A" su Eth0/0.11
+!        l'indirizzo IP viene rimosso automaticamente da IOS — riassegnarlo subito.
+!
+hostname PE1
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.11
+ encapsulation dot1Q 11
+ ip address 192.168.1.2 255.255.255.252
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### PE2
+
+```
+! MOD-11 — PE2 (Provider Edge 2)
+! Stato iniziale: MOD-10 completato (OSPF + MPLS LDP up)
+! Interfaccia CE2 pre-configurata con IP ma SENZA VRF
+! Lo studente configura: ip vrf CUST_A, ip vrf forwarding, eBGP CE-PE
+!
+hostname PE2
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.24
+ encapsulation dot1Q 24
+ ip address 10.0.24.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.22
+ encapsulation dot1Q 22
+ ip address 192.168.2.2 255.255.255.252
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.24.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### P1
+
+```
+! MOD-11 — P1 (Provider Core 1)
+! Stato iniziale: uguale al risultato finale di MOD-10 (OSPF + MPLS LDP full)
+! P1 non richiede modifiche in questo modulo
+!
+hostname P1
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+ mpls ip
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### P2
+
+```
+! MOD-11 — P2 (Provider Core 2)
+! Stato iniziale: uguale al risultato finale di MOD-10 (OSPF + MPLS LDP full)
+! P2 non richiede modifiche in questo modulo
+!
+hostname P2
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 4.4.4.4 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.24
+ encapsulation dot1Q 24
+ ip address 10.0.24.1 255.255.255.252
+ mpls ip
+!
+router ospf 1
+ router-id 4.4.4.4
+ network 4.4.4.4 0.0.0.0 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+ network 10.0.24.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### CE1
+
+```
+! MOD-11 — CE1 (Customer Edge 1 — AS 65001)
+! Stato iniziale: connettività verso PE1 attiva — nessun routing dinamico
+! Lo studente configura: BGP AS 65001, neighbor PE1, network statement
+!
+hostname CE1
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 192.168.10.1 255.255.255.0
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.11
+ encapsulation dot1Q 11
+ ip address 192.168.1.1 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 192.168.1.2
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### CE2
+
+```
+! MOD-11 — CE2 (Customer Edge 2 — AS 65002)
+! Stato iniziale: connettività verso PE2 attiva — nessun routing dinamico
+! Lo studente configura: BGP AS 65002, neighbor PE2, network statement
+!
+hostname CE2
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.22
+ encapsulation dot1Q 22
+ ip address 192.168.2.1 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 192.168.2.2
+!
+line con 0
+ logging synchronous
+!
+end
 ```
 
 ### Prerequisiti

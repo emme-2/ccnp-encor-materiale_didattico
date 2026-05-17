@@ -47,12 +47,12 @@ Obiettivo: tutti i moduli esistenti allineati al nuovo template.
 
 | Step | Task | Chi | Stato | Note |
 |------|------|-----|-------|------|
-| 2.1 | Aggiornare sezione 3 LAB SETUP su tutti i 23 moduli esistenti | 🤖 CC | ⬜ | Cfg inline + nota piattaforme |
-| 2.2 | Convertire topologie ASCII → Mermaid su tutti i moduli | 🤖 CC | ⬜ | |
-| 2.3 | Campionatura qualità workbook (5 moduli a scelta) | 👤 Human | ⬜ | Verifica standard |
-| 2.4 | Allineare profondità sezioni Exam Tips e Troubleshooting | 🤖 CC | ⬜ | Su moduli segnalati in 2.3 |
-| 2.5 | Verifica cross-reference tra moduli | 👤 Human | ⬜ | Prerequisiti coerenti? |
-| 2.6 | Aggiornare MAPPATURA_LAB.md finale | 🤖 CC | ⬜ | |
+| 2.1 | Aggiornare sezione 3 LAB SETUP su tutti i 23 moduli esistenti | 🤖 CC | ✅ | Cfg inline + nota piattaforme — 2026-05-17 |
+| 2.2 | Convertire topologie ASCII → Mermaid su tutti i moduli | 🤖 CC | ✅ | flowchart LR (routing/WAN) e graph TB (L2) — 2026-05-17 |
+| 2.3 | Campionatura qualità workbook (5 moduli a scelta) | 👤 Human | ⬜ | 5 moduli campione in QA_REPORT.md |
+| 2.4 | Allineare profondità sezioni Exam Tips e Troubleshooting | 🤖 CC | ✅ | ≥3 righe troubleshooting · ≥2 Q&A exam tips verificati — 2026-05-17 |
+| 2.5 | Verifica cross-reference tra moduli | 👤 Human | ⬜ | Prerequisiti verificabili — vedi QA_REPORT.md BLK-01/02 |
+| 2.6 | Aggiornare MAPPATURA_LAB.md finale | 🤖 CC | ✅ | Aggiornato data e stato uniformazione — 2026-05-17 |
 
 ---
 
@@ -98,7 +98,7 @@ Obiettivo: repo versionata e distribuibile.
 |-----------|------|------------|
 | **MVP v0.1** | — | ✅ 23 moduli consegnati — 2026-05-14 |
 | **Content Complete** | Fine Fase 1 | 35 moduli con workbook + soluzione + cfg |
-| **Standard Complete** | Fine Fase 2 | Mermaid + cfg inline + uniformità |
+| **Standard Complete** | Fine Fase 2 | ✅ Mermaid + cfg inline + uniformità — 2026-05-17 (⚠️ step 2.3/2.5 da completare da Human) |
 | **Slide Complete** | Fine Fase 3 | 35 slide deck .pptx |
 | **v1.0 Release** | Fine Fase 4 | Tag GitHub + Release ZIP |
 

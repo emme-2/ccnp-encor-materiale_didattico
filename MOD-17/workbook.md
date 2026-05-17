@@ -2,42 +2,29 @@
 
 **Area:** AREA 7 — OVERLAY & VPN | **Ore:** 2h | **Codici syllabus:** 4.1, 4.2, 4.3
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+
 ---
 
 ## 1. TOPOLOGIA
 
 ### Diagramma logico
 
-```
-                  ┌───────────────────────────────────────────────────────┐
-                  │                ISP  (Simulated Internet)               │
-                  │  Lo0: 192.0.2.253/32                                   │
-                  │  e0/0.10  192.0.2.1      VLAN 10 → HUB                │
-                  │  e0/0.20  198.51.100.1   VLAN 20 → SP1                │
-                  │  e0/0.30  203.0.113.1    VLAN 30 → SP2                │
-                  └───────┬──────────────────┬───────────────┬─────────────┘
-              VLAN10 /30  │      VLAN20 /30  │   VLAN30 /30  │
-                          │                  │               │
-              ┌───────────┴──┐   ┌───────────┴──┐  ┌────────┴──────┐
-              │     HUB      │   │     SP1       │  │     SP2       │
-              │ Lo0:         │   │ Lo0:          │  │ Lo0:          │
-              │ 192.0.2.254  │   │ 198.51.100.254│  │ 203.0.113.254 │
-              │ Lo1 CUST-A:  │   │ Lo1 CUST-A:   │  │ Lo1 CUST-A:   │
-              │ 10.1.1.1/32  │   │ 10.1.2.1/32   │  │ 10.1.3.1/32   │
-              │ Lo2 CUST-B:  │   │ Lo2 CUST-B:   │  │ Lo2 CUST-B:   │
-              │ 10.2.1.1/32  │   │ 10.2.2.1/32   │  │ 10.2.3.1/32   │
-              └──────────────┘   └───────────────┘  └───────────────┘
+```mermaid
+flowchart LR
+    ISP["ISP\nLo0: 192.0.2.253/32\ne0/0.10 → 192.0.2.1/30\ne0/0.20 → 198.51.100.1/30\ne0/0.30 → 203.0.113.1/30"]
+    HUB["HUB\nLo0: 192.0.2.254/32\nLo1 CUST-A: 10.1.1.1/32\nLo2 CUST-B: 10.2.1.1/32"]
+    SP1["SP1\nLo0: 198.51.100.254/32\nLo1 CUST-A: 10.1.2.1/32\nLo2 CUST-B: 10.2.2.1/32"]
+    SP2["SP2\nLo0: 203.0.113.254/32\nLo1 CUST-A: 10.1.3.1/32\nLo2 CUST-B: 10.2.3.1/32"]
 
-  Overlay GRE P2P — VRF CUST-A (studenti configurano):
-    Tu101  HUB ←→ SP1   172.16.101.0/30  (.1 HUB  .2 SP1)
-    Tu102  HUB ←→ SP2   172.16.102.0/30  (.1 HUB  .2 SP2)
+    ISP -->|"VLAN 10 · 192.0.2.0/30"| HUB
+    ISP -->|"VLAN 20 · 198.51.100.0/30"| SP1
+    ISP -->|"VLAN 30 · 203.0.113.0/30"| SP2
 
-  Overlay GRE P2P — VRF CUST-B (pre-configurato con 4 bug):
-    Tu201  HUB ←→ SP1   172.16.201.0/30  (.1 HUB  .2 SP1)
-    Tu202  HUB ←→ SP2   172.16.202.0/30  (.1 HUB  .2 SP2)
-
-  SP1 <─────────────── nessun tunnel diretto ───────────────> SP2
-  (traffico SP1↔SP2 transita sempre per HUB — limite del design P2P)
+    HUB -.->|"Tu101 CUST-A · da configurare · 172.16.101.0/30"| SP1
+    HUB -.->|"Tu102 CUST-A · da configurare · 172.16.102.0/30"| SP2
+    HUB ==>|"Tu201 CUST-B · bug pre-configurati · 172.16.201.0/30"| SP1
+    HUB ==>|"Tu202 CUST-B · bug pre-configurati · 172.16.202.0/30"| SP2
 ```
 
 ### Piano di indirizzamento — Underlay (Global Table)
@@ -103,14 +90,267 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### Configurazioni TFTP da caricare
+### Configurazione Iniziale
+
+> Incollare ogni blocco direttamente sulla console del device corrispondente (paste manuale).
+
+#### ISP
 
 ```
-! Su ogni router — caricare il file corrispondente
-HUB# copy tftp://192.168.122.1/ENCOR/MOD-17/hub-cfg running-config
-SP1# copy tftp://192.168.122.1/ENCOR/MOD-17/sp1-cfg running-config
-SP2# copy tftp://192.168.122.1/ENCOR/MOD-17/sp2-cfg running-config
-ISP# copy tftp://192.168.122.1/ENCOR/MOD-17/isp-cfg running-config
+hostname ISP
+!
+interface Loopback0
+ description !! ISP management loopback
+ ip address 192.0.2.253 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.10
+ description !! ISP <-> HUB — VLAN 10 (192.0.2.0/30)
+ encapsulation dot1Q 10
+ ip address 192.0.2.1 255.255.255.252
+!
+interface Ethernet0/0.20
+ description !! ISP <-> SP1 — VLAN 20 (198.51.100.0/30)
+ encapsulation dot1Q 20
+ ip address 198.51.100.1 255.255.255.252
+!
+interface Ethernet0/0.30
+ description !! ISP <-> SP2 — VLAN 30 (203.0.113.0/30)
+ encapsulation dot1Q 30
+ ip address 203.0.113.1 255.255.255.252
+!
+ip route 192.0.2.254 255.255.255.255 192.0.2.2
+ip route 198.51.100.254 255.255.255.255 198.51.100.2
+ip route 203.0.113.254 255.255.255.255 203.0.113.2
+end
+```
+
+#### HUB
+
+```
+hostname HUB
+!
+! --- UNDERLAY ---
+interface Loopback0
+ ip address 192.0.2.254 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.10
+ description !! ISP link — VLAN 10 — 192.0.2.0/30
+ encapsulation dot1Q 10
+ ip address 192.0.2.2 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 192.0.2.1
+!
+! --- VRF CUST-B (pre-configurato — contiene 3 bug da trovare) ---
+vrf definition CUST-B
+ description !! Customer B — pre-configured for reference/troubleshooting
+ rd 2:1
+ address-family ipv4
+ exit-address-family
+!
+interface Loopback2
+ description !! VRF CUST-B customer loopback — BUG: wrong IP
+ vrf forwarding CUST-B
+ ip address 10.2.2.1 255.255.255.255
+!
+interface Tunnel201
+ description !! GRE CUST-B HUB<->SP1
+ vrf forwarding CUST-B
+ ip address 172.16.201.1 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 198.51.100.254
+ tunnel mode gre ip
+ no shutdown
+!
+interface Tunnel202
+ description !! GRE CUST-B HUB<->SP2 — BUG: tunnel source wrong
+ vrf forwarding CUST-B
+ ip address 172.16.202.1 255.255.255.252
+ tunnel source Ethernet0/0.10
+ tunnel destination 203.0.113.254
+ tunnel mode gre ip
+ no shutdown
+!
+ip route vrf CUST-B 10.2.2.1 255.255.255.255 Tunnel201
+ip route vrf CUST-B 10.2.3.1 255.255.255.255 Tunnel202
+!
+interface Tunnel210
+ description !! DMVPN CUST-B cloud — HUB — BUG: missing tunnel mode gre multipoint
+ vrf forwarding CUST-B
+ ip address 172.16.210.1 255.255.255.0
+ tunnel source Loopback0
+ ip nhrp network-id 210
+ ip nhrp map multicast dynamic
+ ip nhrp redirect
+ no shutdown
+end
+```
+
+#### SP1
+
+```
+hostname SP1
+!
+! --- UNDERLAY ---
+interface Loopback0
+ description !! Tunnel source — global table
+ ip address 198.51.100.254 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.20
+ description !! ISP link — VLAN 20 — 198.51.100.0/30
+ encapsulation dot1Q 20
+ ip address 198.51.100.2 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 198.51.100.1
+!
+! --- VRF CUST-B (pre-configurato — contiene 3 bug da trovare) ---
+vrf definition CUST-B
+ description !! Customer B — pre-configured for reference/troubleshooting
+ rd 2:2
+ address-family ipv4
+ exit-address-family
+!
+interface Loopback2
+ description !! VRF CUST-B customer loopback — BUG: no vrf forwarding
+ ip address 10.2.2.1 255.255.255.255
+!
+interface Tunnel201
+ description !! GRE CUST-B SP1<->HUB — BUG: tunnel destination wrong
+ vrf forwarding CUST-B
+ ip address 172.16.201.2 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 203.0.113.254
+ tunnel mode gre ip
+ no shutdown
+!
+ip route vrf CUST-B 10.2.1.1 255.255.255.255 Tunnel201
+ip route vrf CUST-B 10.2.3.1 255.255.255.255 Tunnel201
+!
+interface Tunnel210
+ description !! DMVPN CUST-B cloud — SP1 spoke — BUG: wrong nhrp network-id
+ vrf forwarding CUST-B
+ ip address 172.16.210.11 255.255.255.0
+ tunnel source Loopback0
+ tunnel mode gre multipoint
+ ip nhrp network-id 211
+ ip nhrp nhs 172.16.210.1
+ ip nhrp map 172.16.210.1 192.0.2.254
+ ip nhrp map multicast 192.0.2.254
+ ip nhrp shortcut
+ no shutdown
+end
+```
+
+#### SP2
+
+```
+hostname SP2
+!
+! --- UNDERLAY ---
+interface Loopback0
+ description !! Tunnel source — global table
+ ip address 203.0.113.254 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0.30
+ description !! ISP link — VLAN 30 — 203.0.113.0/30
+ encapsulation dot1Q 30
+ ip address 203.0.113.2 255.255.255.252
+!
+ip route 0.0.0.0 0.0.0.0 203.0.113.1
+!
+! --- VRF CUST-B (pre-configurato — corretto eccetto Tu210) ---
+vrf definition CUST-B
+ description !! Customer B — fully correct on SP2
+ rd 2:3
+ address-family ipv4
+ exit-address-family
+!
+interface Loopback2
+ description !! VRF CUST-B customer loopback
+ vrf forwarding CUST-B
+ ip address 10.2.3.1 255.255.255.255
+!
+interface Tunnel202
+ description !! GRE CUST-B SP2<->HUB — correct
+ vrf forwarding CUST-B
+ ip address 172.16.202.2 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 192.0.2.254
+ tunnel mode gre ip
+ no shutdown
+!
+ip route vrf CUST-B 10.2.1.1 255.255.255.255 Tunnel202
+ip route vrf CUST-B 10.2.2.1 255.255.255.255 Tunnel202
+!
+interface Tunnel210
+ description !! DMVPN CUST-B cloud — SP2 spoke — BUG: wrong NHS IP
+ vrf forwarding CUST-B
+ ip address 172.16.210.12 255.255.255.0
+ tunnel source Loopback0
+ tunnel mode gre multipoint
+ ip nhrp network-id 210
+ ip nhrp nhs 172.16.210.2
+ ip nhrp map 172.16.210.2 203.0.113.254
+ ip nhrp map multicast 203.0.113.254
+ ip nhrp shortcut
+ no shutdown
+!
+! --- VRF CUST-A (pre-configurato come reference IPSec — Part 4) ---
+vrf definition CUST-A
+ description !! Customer A — SP2 pre-configured as IPSec reference
+ rd 1:3
+ address-family ipv4
+ exit-address-family
+!
+interface Loopback1
+ description !! VRF CUST-A customer loopback
+ vrf forwarding CUST-A
+ ip address 10.1.3.1 255.255.255.255
+!
+interface Tunnel102
+ description !! GRE CUST-A SP2<->HUB — REFERENCE: IPSec pre-applicato
+ vrf forwarding CUST-A
+ ip address 172.16.102.2 255.255.255.252
+ tunnel source Loopback0
+ tunnel destination 192.0.2.254
+ tunnel mode gre ip
+ tunnel protection ipsec profile IPSEC-PROF
+ no shutdown
+!
+crypto ikev2 proposal PROP-ENCOR
+ encryption aes-cbc-256
+ integrity sha256
+ group 14
+!
+crypto ikev2 policy POL-ENCOR
+ proposal PROP-ENCOR
+!
+crypto ikev2 keyring KR-ENCOR
+ peer HUB
+  address 192.0.2.254
+  pre-shared-key cisco123
+ !
+ peer SP1
+  address 198.51.100.254
+  pre-shared-key cisco123
+!
+crypto ikev2 profile PROF-ENCOR
+ match identity remote address 192.0.2.254 255.255.255.255
+ match identity remote address 198.51.100.254 255.255.255.255
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local KR-ENCOR
+!
+crypto ipsec transform-set TS-ENCOR esp-aes 256 esp-sha256-hmac
+ mode tunnel
+!
+crypto ipsec profile IPSEC-PROF
+ set transform-set TS-ENCOR
+ set ikev2-profile PROF-ENCOR
+end
 ```
 
 ### Prerequisiti

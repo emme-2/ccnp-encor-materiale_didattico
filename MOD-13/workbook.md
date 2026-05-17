@@ -1,27 +1,27 @@
 # Workbook Studenti — MOD-13: EtherChannel LACP
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** Layer 2 Technologies | **Ore:** 1h | **Codici syllabus:** 3.1.b
 
 ---
 
 ## 1. TOPOLOGIA
 
-```
-          [WAN / Upstream]
-                |
-           R1 Lo0: 1.1.1.1/32
-          /              \
-     e0/1.100          e0/2.200
-         |                  |
-        SW1               SW2
-   VLAN 10 Active     VLAN 20 Active
-   VLAN 20 Standby    VLAN 10 Standby
-         |                  |
-   e0/2 + e0/3 ←─ Po1 ─→ e0/2 + e0/3
-         |                  |
-   e1/0: PC1           e1/0: PC2
-   (VLAN 10)           (VLAN 20)
-   e1/1: SPAN-dst VPCS
+```mermaid
+graph TB
+    R1["**R1** — Router\nLo0: 1.1.1.1/32\ne0/1.100: 10.0.12.1/30\ne0/2.200: 10.0.13.1/30"]
+    SW1["**SW1** — IOU L2\nSVI VLAN10: 10.10.10.2/24 · HSRP Active\nSVI VLAN20: 10.10.20.3/24 · HSRP Standby\nSVI VLAN100: 10.0.12.2/30"]
+    SW2["**SW2** — IOU L2\nSVI VLAN10: 10.10.10.3/24 · HSRP Standby\nSVI VLAN20: 10.10.20.2/24 · HSRP Active\nSVI VLAN200: 10.0.13.2/30"]
+    PC1["PC1\n10.10.10.10/24 · GW 10.10.10.1\nVLAN 10"]
+    PC2["PC2\n10.10.20.10/24 · GW 10.10.20.1\nVLAN 20"]
+
+    R1 -->|"VLAN 100\n10.0.12.0/30 trunk"| SW1
+    R1 -->|"VLAN 200\n10.0.13.0/30 trunk"| SW2
+    SW1 <-->|"e0/2 + e0/3\nPo1 LACP\ntrunk VLAN10+20\nda configurare"| SW2
+    PC1 -->|"e1/0 access VLAN10"| SW1
+    PC2 -->|"e1/0 access VLAN20"| SW2
 ```
 
 ### Piano di indirizzamento
@@ -67,24 +67,186 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
 
-Caricare le configurazioni iniziali su ogni device prima di iniziare il lab:
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+
+#### R1
 
 ```
-! Su SW1
-SW1# copy tftp://192.168.122.1/ENCOR/MOD-13/sw1-cfg running-config
-
-! Su SW2
-SW2# copy tftp://192.168.122.1/ENCOR/MOD-13/sw2-cfg running-config
-
-! Su R1
-R1# copy tftp://192.168.122.1/ENCOR/MOD-13/r1-cfg running-config
+hostname R1
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ vrf forwarding LAB
+ ip address dhcp
+ no shutdown
+!
+interface Ethernet0/1
+ no ip address
+ no shutdown
+!
+interface Ethernet0/1.100
+ encapsulation dot1Q 100
+ ip address 10.0.12.1 255.255.255.252
+!
+interface Ethernet0/2
+ no ip address
+ no shutdown
+!
+interface Ethernet0/2.200
+ encapsulation dot1Q 200
+ ip address 10.0.13.1 255.255.255.252
+!
+ip route 10.10.10.0 255.255.255.0 10.0.12.2
+ip route 10.10.10.0 255.255.255.0 10.0.13.2 10
+ip route 10.10.20.0 255.255.255.0 10.0.13.2
+ip route 10.10.20.0 255.255.255.0 10.0.12.2 10
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
 ```
 
-Le configurazioni pre-caricate includono:
-- **R1**: interfacce sub-IF VLAN 100/200, Loopback0, rotte statiche verso SW1/SW2
-- **SW1 e SW2**: hostname, VLAN 10/20/100-200, trunk verso R1 (e0/1), SVI di transit, default route, porte access e1/0
+#### SW1
+
+```
+hostname SW1
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 100
+ name TRANSIT-R1-SW1
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shutdown
+!
+interface Ethernet0/2
+ no shutdown
+!
+interface Ethernet0/3
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.2 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.3 255.255.255.0
+ no shutdown
+!
+interface Vlan100
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+ip route 0.0.0.0 0.0.0.0 10.0.12.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
+```
+
+#### SW2
+
+```
+hostname SW2
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 200
+ name TRANSIT-R1-SW2
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,200
+ no shutdown
+!
+interface Ethernet0/2
+ no shutdown
+!
+interface Ethernet0/3
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ no shutdown
+!
+interface Ethernet1/1
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.3 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.2 255.255.255.0
+ no shutdown
+!
+interface Vlan200
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+!
+ip route 0.0.0.0 0.0.0.0 10.0.13.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
+```
 
 ### Prerequisiti
 

@@ -1,27 +1,27 @@
 # Workbook Studenti — MOD-16: IP SLA & SPAN
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** Network Assurance | **Ore:** 2h | **Codici syllabus:** 4.3 · 4.4
 
 ---
 
 ## 1. TOPOLOGIA
 
-```
-          [WAN / Upstream: 1.1.1.1 = R1 Lo0]
-                    |
-               R1 (IOU L3)
-              /             \
-        e0/1.100          e0/2.200
-            |                  |
-           SW1               SW2
-      IP SLA 1 → 1.1.1.1   IP SLA 1 → 1.1.1.1
-            |                  |
-      e0/2+e0/3 ←─ Po1 ─→ e0/2+e0/3
-      (RSPAN VLAN 999)
-            |                  |
-      e1/0: PC1           e1/0: PC2
-      (VLAN 10)           (VLAN 20)
-      e1/1: SPAN-dst      e1/1: disponibile
+```mermaid
+graph TB
+    R1["**R1** — Router upstream\nLo0: 1.1.1.1/32 · Target IP SLA\ne0/1.100: 10.0.12.1/30\ne0/2.200: 10.0.13.1/30"]
+    SW1["**SW1** — IOU L2\nVLAN10: 10.10.10.2/24 · HSRP Active (prio 110)\nVLAN20: 10.10.20.3/24 · HSRP Standby (prio 100)\nIP SLA 1 → 1.1.1.1 / Track 1\ne1/1: Local SPAN dest (T2)"]
+    SW2["**SW2** — IOU L2\nVLAN10: 10.10.10.3/24 · HSRP Standby (prio 100)\nVLAN20: 10.10.20.2/24 · HSRP Active (prio 110)\nIP SLA 1 → 1.1.1.1 / Track 1\ne1/1: RSPAN dest via VLAN 999 (T3)"]
+    PC1["PC1\n10.10.10.10/24 · VLAN 10\nSorgente SPAN/RSPAN (e1/0 SW1)"]
+    PC2["PC2\n10.10.20.10/24 · VLAN 20"]
+
+    R1 -->|"VLAN 100\n10.0.12.0/30"| SW1
+    R1 -->|"VLAN 200\n10.0.13.0/30"| SW2
+    SW1 <-->|"Po1 LACP · trunk VLAN10+20\n+ RSPAN transit VLAN 999"| SW2
+    PC1 -->|"e1/0 access VLAN10"| SW1
+    PC2 -->|"e1/0 access VLAN20"| SW2
 ```
 
 ### Topologia SPAN/RSPAN
@@ -53,14 +53,215 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
+
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+SW1 e SW2 includono già Po1 LACP + STP + HSRP + IP SLA da MOD-13/14/15.
+
+#### SW1
 
 ```
-! Su SW1
-SW1# copy tftp://192.168.122.1/ENCOR/MOD-16/sw1-cfg running-config
+! MOD-16 — SW1
+! Stato iniziale: EtherChannel Po1 + STP + HSRP v2 + IP SLA tracking configurati
+! Da MOD-13+14+15 completati.
+! SW1: HSRP Active VLAN 10 (priority 110), Standby VLAN 20 (priority 100)
+! IP SLA 1: ping 1.1.1.1 source vlan 10, track 1, standby 10 track 1 decrement 20
+! Lo studente configura: IP SLA con threshold/reaction (T1), SPAN locale (T2), RSPAN (T3)
+!
+hostname SW1
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 100
+ name TRANSIT-R1-SW1
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shutdown
+!
+interface Ethernet0/2
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet0/3
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ spanning-tree guard root
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.2 255.255.255.0
+ standby version 2
+ standby 10 ip 10.10.10.1
+ standby 10 priority 110
+ standby 10 preempt
+ standby 10 timers 1 3
+ standby 10 track 1 decrement 20
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.3 255.255.255.0
+ standby version 2
+ standby 20 ip 10.10.20.1
+ standby 20 priority 100
+ standby 20 preempt
+ standby 20 timers 1 3
+ no shutdown
+!
+interface Vlan100
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+spanning-tree vlan 10 priority 4096
+spanning-tree vlan 20 priority 8192
+!
+ip sla 1
+ icmp-echo 1.1.1.1 source-interface vlan 10
+ frequency 5
+ip sla schedule 1 life forever start-time now
+!
+track 1 ip sla 1 reachability
+!
+ip route 0.0.0.0 0.0.0.0 10.0.12.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
+```
 
-! Su SW2
-SW2# copy tftp://192.168.122.1/ENCOR/MOD-16/sw2-cfg running-config
+#### SW2
+
+```
+! MOD-16 — SW2
+! Stato iniziale: EtherChannel Po1 + STP + HSRP v2 + IP SLA tracking configurati
+! SW2: HSRP Standby VLAN 10 (priority 100), Active VLAN 20 (priority 110)
+! IP SLA 1: ping 1.1.1.1 source vlan 20, track 1, standby 20 track 1 decrement 20
+! Lo studente configura: SPAN locale (T2), RSPAN cross-switch VLAN 999 (T3), ERSPAN teoria (T4)
+!
+hostname SW2
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 200
+ name TRANSIT-R1-SW2
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,200
+ no shutdown
+!
+interface Ethernet0/2
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet0/3
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface Ethernet1/1
+ no shutdown
+!
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ spanning-tree guard root
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.3 255.255.255.0
+ standby version 2
+ standby 10 ip 10.10.10.1
+ standby 10 priority 100
+ standby 10 preempt
+ standby 10 timers 1 3
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.2 255.255.255.0
+ standby version 2
+ standby 20 ip 10.10.20.1
+ standby 20 priority 110
+ standby 20 preempt
+ standby 20 timers 1 3
+ standby 20 track 1 decrement 20
+ no shutdown
+!
+interface Vlan200
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+!
+spanning-tree vlan 20 priority 4096
+spanning-tree vlan 10 priority 8192
+!
+ip sla 1
+ icmp-echo 1.1.1.1 source-interface vlan 20
+ frequency 5
+ip sla schedule 1 life forever start-time now
+!
+track 1 ip sla 1 reachability
+!
+ip route 0.0.0.0 0.0.0.0 10.0.13.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
 ```
 
 ### Prerequisiti

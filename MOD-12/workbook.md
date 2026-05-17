@@ -1,5 +1,8 @@
 ﻿# Workbook Studenti — MOD-12: MPLS L2VPN (xconnect / AToM)
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** AREA 4 — MPLS | **Ore:** 1.5h | **Codici syllabus:** 2.2
 **Prerequisito:** MOD-10 completato — LDP attivo su tutta la backbone. MOD-11 opzionale.
 
@@ -9,15 +12,22 @@
 
 ### Diagramma logico
 
-```
-CE1 ─── PE1 ─── P1 ─── P2 ─── PE2 ─── CE2
-        ↕  pseudowire xconnect  ↕
-   Et0/0.101                 Et0/0.202
-   172.16.0.1/24             172.16.0.2/24
-   (VLAN 101)                (VLAN 202)
-
-Il pseudowire crea un collegamento L2 trasparente:
-CE1 e CE2 si vedono come se fossero collegati con un cavo Ethernet diretto.
+```mermaid
+flowchart LR
+    CE1["**CE1**\nEth0/0.101: 172.16.0.1/24\nVLAN 101"]
+    subgraph CORE["AS 65000 — Backbone MPLS (LDP pre-configurato)"]
+        PE1["**PE1**\nLo0: 1.1.1.1/32\nEth0/0.101 — xconnect\nEth0/0.13: 10.0.13.1/30"]
+        P1["**P1**\nLo0: 3.3.3.3/32\nEth0/0.13: 10.0.13.2/30\nEth0/0.34: 10.0.34.1/30"]
+        P2["**P2**\nLo0: 4.4.4.4/32\nEth0/0.34: 10.0.34.2/30\nEth0/0.24: 10.0.24.1/30"]
+        PE2["**PE2**\nLo0: 2.2.2.2/32\nEth0/0.202 — xconnect\nEth0/0.24: 10.0.24.2/30"]
+        PE1 -->|"VLAN 13\n10.0.13.0/30\nOSPF+LDP"| P1
+        P1 -->|"VLAN 34\n10.0.34.0/30\nOSPF+LDP"| P2
+        P2 -->|"VLAN 24\n10.0.24.0/30\nOSPF+LDP"| PE2
+        PE1 <-.->|"pseudowire xconnect\nVC-ID 101 · encap mpls\nLo0 1.1.1.1 ↔ 2.2.2.2"| PE2
+    end
+    CE2["**CE2**\nEth0/0.202: 172.16.0.2/24\nVLAN 202"]
+    CE1 -->|"VLAN 101\nL2 attachment circuit"| PE1
+    PE2 -->|"VLAN 202\nL2 attachment circuit"| CE2
 ```
 
 ### Piano di indirizzamento — interfacce L2VPN
@@ -59,19 +69,242 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
 
-> **ATTENZIONE:** I file cfg TFTP non sono ancora disponibili.
-> Assicurarsi che il backbone da MOD-10 sia operativo (LDP Up su tutti i link).
-> Le interfacce CE (Eth0/0.101 e Eth0/0.202) devono avere già l'encapsulation
-> dot1Q configurata e gli IP sui CE.
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+P1 e P2 sono identici allo stato finale di MOD-10 (backbone MPLS già configurato).
+
+#### PE1
 
 ```
-! Quando disponibili, caricare con:
-! copy tftp://192.168.122.1/ENCOR/MOD-12/pe1-cfg  running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-12/pe2-cfg  running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-12/ce1-cfg  running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-12/ce2-cfg  running-config
+! MOD-12 — PE1
+! Stato iniziale: backbone MPLS LDP operativo (risultato MOD-10)
+! Eth0/0.101 pronta per xconnect — NESSUN IP, NESSUN xconnect
+! Lo studente configura: xconnect 2.2.2.2 101 encapsulation mpls
+!
+hostname PE1
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.101
+ encapsulation dot1Q 101
+ no ip address
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### PE2
+
+```
+! MOD-12 — PE2
+! Stato iniziale: backbone MPLS LDP operativo (risultato MOD-10)
+! Eth0/0.202 pronta per xconnect — NESSUN IP, NESSUN xconnect
+! Lo studente configura: xconnect 1.1.1.1 101 encapsulation mpls
+!
+hostname PE2
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.24
+ encapsulation dot1Q 24
+ ip address 10.0.24.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.202
+ encapsulation dot1Q 202
+ no ip address
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.24.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### P1
+
+```
+! MOD-12 — P1 — invariato rispetto a MOD-10/11
+!
+hostname P1
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+ mpls ip
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### P2
+
+```
+! MOD-12 — P2 — invariato rispetto a MOD-10/11
+!
+hostname P2
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 4.4.4.4 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.24
+ encapsulation dot1Q 24
+ ip address 10.0.24.1 255.255.255.252
+ mpls ip
+!
+router ospf 1
+ router-id 4.4.4.4
+ network 4.4.4.4 0.0.0.0 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+ network 10.0.24.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### CE1
+
+```
+! MOD-12 — CE1
+! Stato iniziale: interfaccia Eth0/0.101 con IP (endpoint L2VPN lato CE)
+! Il CE non sa di essere su una rete MPLS — vede un link L2 diretto verso CE2
+! Test: ping 172.16.0.2 — funziona quando xconnect è UP su PE1 e PE2
+!
+hostname CE1
+!
+no ip domain lookup
+ip routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.101
+ encapsulation dot1Q 101
+ ip address 172.16.0.1 255.255.255.0
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### CE2
+
+```
+! MOD-12 — CE2
+! Stato iniziale: interfaccia Eth0/0.202 con IP (endpoint L2VPN lato CE)
+! NOTA: VLAN asimmetrica — CE2 usa VLAN 202, CE1 usa VLAN 101
+!       Il PE fa la traduzione VLAN tramite xconnect
+! Test: ping 172.16.0.1 quando xconnect è UP
+!
+hostname CE2
+!
+no ip domain lookup
+ip routing
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.202
+ encapsulation dot1Q 202
+ ip address 172.16.0.2 255.255.255.0
+!
+line con 0
+ logging synchronous
+!
+end
 ```
 
 ### Prerequisiti

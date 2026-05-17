@@ -1,5 +1,8 @@
 # Workbook Studenti — MOD-06: BGP Traffic Engineering
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** AREA 2 — BGP | **Ore:** 2h | **Codici syllabus:** 1.11.c · 1.11.d · 1.11.e
 
 ---
@@ -8,28 +11,27 @@
 
 ### Diagramma Logico
 
-```
-  ┌─────────────── AS 65001 (ISP) ───────────────┐     ┌────────── AS 65000 (Customer) ──────────┐
-  │                                               │     │                                          │
-  │   Lo0:1.1.1.1     Lo0:2.2.2.2                │     │   Lo0:4.4.4.4     Lo0:5.5.5.5           │
-  │      R1 ──────────── R2                       │     │      R4 ──────────── R5                 │
-  │      │ \           / │                        │     │      │ \           / │                  │
-  │      │  \         /  │                        │     │      │  \         /  │                  │
-  │      │   R3──────┘   │           eBGP         │     │      │   R6──────┘   │                  │
-  │      │   │  Lo0:     │  ┌──────────────────┐  │     │      │   │  Lo0:     │                  │
-  │      │   │ 3.3.3.3   │  │ R1 ↔ R4 (VLAN14)│  │     │      │   │ 6.6.6.6   │                  │
-  │      │   │           ├──┤ 172.16.14.0/30   ├──┤     ├──────┤   │           │                  │
-  │      │   │           │  └──────────────────┘  │     │      │   │           │                  │
-  │      │   │           │  ┌──────────────────┐  │     │      │   │           │                  │
-  │      │   │           ├──┤ R3 ↔ R5 (VLAN35)├──┤     ├──────┤   │           │                  │
-  │      │   │           │  │ 172.16.35.0/30   │  │     │      │   │           │                  │
-  │      │   │           │  └──────────────────┘  │     │      │   │           │                  │
-  └──────────────────────┘                        └─────────────────────────────┘
-       OSPF 1 + iBGP                                    OSPF 1 + iBGP
-       full-mesh (pre-cfg)                              full-mesh (pre-cfg da MOD-05)
+```mermaid
+flowchart LR
+    subgraph ISP["AS 65001 — ISP (pre-configurato)"]
+        R1["**R1** — border PRIMARIO\nLo0: 1.1.1.1/32\ne0/0.14: 172.16.14.1/30"]
+        R2["**R2** — internal\nLo0: 2.2.2.2/32"]
+        R3["**R3** — border secondario\nLo0: 3.3.3.3/32\ne0/0.35: 172.16.35.1/30"]
+        R1 -->|"VLAN 12 · 10.0.12.0/30\nOSPF+iBGP"| R2
+        R1 -->|"VLAN 13 · 10.0.13.0/30\nOSPF+iBGP"| R3
+        R2 -->|"VLAN 23 · 10.0.23.0/30\nOSPF+iBGP"| R3
+    end
+    subgraph CUST["AS 65000 — Customer (stato finale MOD-05)"]
+        R4["**R4** — border PRIMARIO\nLo0: 4.4.4.4/32\ne0/0.14: 172.16.14.2/30"]
+        R5["**R5** — border secondario\nLo0: 5.5.5.5/32\ne0/0.35: 172.16.35.2/30"]
+        R6["**R6** — internal\nLo0: 6.6.6.6/32"]
+        R4 -->|"VLAN 45 · 192.168.45.0/30\nOSPF+iBGP"| R5
+        R4 -->|"VLAN 46 · 192.168.46.0/30\nOSPF+iBGP"| R6
+        R5 -->|"VLAN 56 · 192.168.56.0/30\nOSPF+iBGP"| R6
+    end
 
-  Traffico Customer → Internet: preferenza via R4↔R1  (Local Preference - Task 9)
-  Traffico Internet → Customer: preferenza via R1↔R4  (AS-Path Prepend - Task 10)
+    R1 -->|"VLAN 14 · 172.16.14.0/30\neBGP PRIMARIO\nLocal-Pref T9 · AS-Prepend T10"| R4
+    R3 -->|"VLAN 35 · 172.16.35.0/30\neBGP secondario"| R5
 ```
 
 ### Piano di Indirizzamento
@@ -74,15 +76,342 @@ Al termine di questo modulo lo studente sarà in grado di:
 | eBGP R3 ↔ R5 | R3, R5 | Established |
 | Annunci BGP Customer | R4 | 4.4.4.4/32 e 192.168.45.0/30 via network stmt |
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
+
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+Questi file rappresentano lo stato finale di MOD-05 (tutti i peering BGP operativi).
+
+#### R1
 
 ```
-! Su ogni router (sostituire rx con r1, r2, ... r6)
-copy tftp://192.168.122.1/ENCOR/MOD-06/rx-cfg running-config
+! MOD-06 cfg iniziale — R1 (AS 65001 — ISP border verso R4)
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh + eBGP R1↔R4 operativo
+! Nessuna route-map / prefix-list / community / local-pref configurati
+!
+hostname R1
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ description ISP_Internal_R1-R2
+ no shutdown
+!
+interface ethernet 0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ description ISP_Internal_R1-R3
+ no shutdown
+!
+interface ethernet 0/0.14
+ encapsulation dot1Q 14
+ ip address 172.16.14.1 255.255.255.252
+ description eBGP_to_R4_AS65000
+ no shutdown
+!
+interface loopback 0
+ ip address 1.1.1.1 255.255.255.255
+ description Router-ID_and_iBGP_source
+ no shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 1.1.1.1
+ neighbor 2.2.2.2 remote-as 65001
+ neighbor 2.2.2.2 update-source Loopback0
+ neighbor 2.2.2.2 next-hop-self
+ neighbor 3.3.3.3 remote-as 65001
+ neighbor 3.3.3.3 update-source Loopback0
+ neighbor 3.3.3.3 next-hop-self
+ neighbor 172.16.14.2 remote-as 65000
+ network 1.1.1.1 mask 255.255.255.255
+!
+end
 ```
 
-> **Nota:** I file cfg TFTP per questo modulo sono in fase di sviluppo (placeholder).
-> I cfg caricano lo stato finale di MOD-05 come punto di partenza.
+#### R2
+
+```
+! MOD-06 cfg iniziale — R2 (AS 65001 — ISP internal)
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh operativo
+!
+hostname R2
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.2 255.255.255.252
+ description ISP_Internal_R1-R2
+ no shutdown
+!
+interface ethernet 0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.1 255.255.255.252
+ description ISP_Internal_R2-R3
+ no shutdown
+!
+interface loopback 0
+ ip address 2.2.2.2 255.255.255.255
+ description Router-ID_and_iBGP_source
+ no shutdown
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 2.2.2.2
+ neighbor 1.1.1.1 remote-as 65001
+ neighbor 1.1.1.1 update-source Loopback0
+ neighbor 1.1.1.1 next-hop-self
+ neighbor 3.3.3.3 remote-as 65001
+ neighbor 3.3.3.3 update-source Loopback0
+ neighbor 3.3.3.3 next-hop-self
+ network 2.2.2.2 mask 255.255.255.255
+!
+end
+```
+
+#### R3
+
+```
+! MOD-06 cfg iniziale — R3 (AS 65001 — ISP border verso R5)
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh + eBGP R3↔R5 operativo (T3 completato)
+! Nessuna route-map / community / local-pref configurati
+!
+hostname R3
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+ description ISP_Internal_R1-R3
+ no shutdown
+!
+interface ethernet 0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.2 255.255.255.252
+ description ISP_Internal_R2-R3
+ no shutdown
+!
+interface ethernet 0/0.35
+ encapsulation dot1Q 35
+ ip address 172.16.35.1 255.255.255.252
+ description eBGP_to_R5_AS65000
+ no shutdown
+!
+interface loopback 0
+ ip address 3.3.3.3 255.255.255.255
+ description Router-ID_and_iBGP_source
+ no shutdown
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65001
+ bgp router-id 3.3.3.3
+ neighbor 1.1.1.1 remote-as 65001
+ neighbor 1.1.1.1 update-source Loopback0
+ neighbor 1.1.1.1 next-hop-self
+ neighbor 2.2.2.2 remote-as 65001
+ neighbor 2.2.2.2 update-source Loopback0
+ neighbor 2.2.2.2 next-hop-self
+ neighbor 172.16.35.2 remote-as 65000
+ network 3.3.3.3 mask 255.255.255.255
+!
+end
+```
+
+#### R4
+
+```
+! MOD-06 cfg iniziale — R4 (AS 65000 — Customer border verso R1)
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh + eBGP R1↔R4 operativo
+! Nessuna route-map / prefix-list / community / local-pref configurati
+!
+hostname R4
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.14
+ encapsulation dot1Q 14
+ ip address 172.16.14.2 255.255.255.252
+ description eBGP_to_R1_AS65001
+ no shutdown
+!
+interface ethernet 0/0.45
+ encapsulation dot1Q 45
+ ip address 192.168.45.1 255.255.255.252
+ description Customer_Internal_R4-R5
+ no shutdown
+!
+interface ethernet 0/0.46
+ encapsulation dot1Q 46
+ ip address 192.168.46.1 255.255.255.252
+ description Customer_Internal_R4-R6
+ no shutdown
+!
+interface loopback 0
+ ip address 4.4.4.4 255.255.255.255
+ description Router-ID_iBGP_source_AS65000
+ no shutdown
+!
+router ospf 1
+ router-id 4.4.4.4
+ network 4.4.4.4 0.0.0.0 area 0
+ network 192.168.45.0 0.0.0.3 area 0
+ network 192.168.46.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65000
+ bgp router-id 4.4.4.4
+ neighbor 172.16.14.1 remote-as 65001
+ neighbor 5.5.5.5 remote-as 65000
+ neighbor 5.5.5.5 update-source Loopback0
+ neighbor 5.5.5.5 next-hop-self
+ neighbor 6.6.6.6 remote-as 65000
+ neighbor 6.6.6.6 update-source Loopback0
+ neighbor 6.6.6.6 next-hop-self
+ network 4.4.4.4 mask 255.255.255.255
+ network 192.168.45.0 mask 255.255.255.252
+!
+end
+```
+
+#### R5
+
+```
+! MOD-06 cfg iniziale — R5 (AS 65000 — Customer border verso R3)
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh + eBGP R3↔R5 operativo
+! Nessuna route-map / prefix-list / community / local-pref configurati
+!
+hostname R5
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.35
+ encapsulation dot1Q 35
+ ip address 172.16.35.2 255.255.255.252
+ description eBGP_to_R3_AS65001
+ no shutdown
+!
+interface ethernet 0/0.45
+ encapsulation dot1Q 45
+ ip address 192.168.45.2 255.255.255.252
+ description Customer_Internal_R4-R5
+ no shutdown
+!
+interface ethernet 0/0.56
+ encapsulation dot1Q 56
+ ip address 192.168.56.1 255.255.255.252
+ description Customer_Internal_R5-R6
+ no shutdown
+!
+interface loopback 0
+ ip address 5.5.5.5 255.255.255.255
+ description Router-ID_iBGP_source_AS65000
+ no shutdown
+!
+router ospf 1
+ router-id 5.5.5.5
+ network 5.5.5.5 0.0.0.0 area 0
+ network 192.168.45.0 0.0.0.3 area 0
+ network 192.168.56.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65000
+ bgp router-id 5.5.5.5
+ neighbor 4.4.4.4 remote-as 65000
+ neighbor 4.4.4.4 update-source Loopback0
+ neighbor 4.4.4.4 next-hop-self
+ neighbor 6.6.6.6 remote-as 65000
+ neighbor 6.6.6.6 update-source Loopback0
+ neighbor 6.6.6.6 next-hop-self
+ neighbor 172.16.35.1 remote-as 65001
+!
+end
+```
+
+#### R6
+
+```
+! MOD-06 cfg iniziale — R6 (AS 65000 — Customer internal)
+! STATO FINALE MOD-05: OSPF 1 + iBGP full-mesh operativo
+! Nessuna route-map / prefix-list / community / local-pref configurati
+!
+hostname R6
+no ip domain-lookup
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.46
+ encapsulation dot1Q 46
+ ip address 192.168.46.2 255.255.255.252
+ description Customer_Internal_R4-R6
+ no shutdown
+!
+interface ethernet 0/0.56
+ encapsulation dot1Q 56
+ ip address 192.168.56.2 255.255.255.252
+ description Customer_Internal_R5-R6
+ no shutdown
+!
+interface loopback 0
+ ip address 6.6.6.6 255.255.255.255
+ description Router-ID_iBGP_source_AS65000
+ no shutdown
+!
+router ospf 1
+ router-id 6.6.6.6
+ network 6.6.6.6 0.0.0.0 area 0
+ network 192.168.46.0 0.0.0.3 area 0
+ network 192.168.56.0 0.0.0.3 area 0
+ passive-interface Loopback0
+!
+router bgp 65000
+ bgp router-id 6.6.6.6
+ neighbor 4.4.4.4 remote-as 65000
+ neighbor 4.4.4.4 update-source Loopback0
+ neighbor 4.4.4.4 next-hop-self
+ neighbor 5.5.5.5 remote-as 65000
+ neighbor 5.5.5.5 update-source Loopback0
+ neighbor 5.5.5.5 next-hop-self
+!
+end
+```
 
 ### Verifica pre-lab
 

@@ -2,25 +2,26 @@
 
 **Area:** QoS | **Ore:** 2h | **Codici syllabus:** 1.5.a · 1.5.b
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+
 ---
 
 ## 1. TOPOLOGIA
 
-```
-     PC1 (10.10.10.10)
-          |
-         SW1
-          |
-     R1 e0/1.100
-         |
-     R1 e0/0 ──── [WAN / Internet]
-     (QoS outbound: PM-WAN-PARENT)
-         |
-     R1 e0/2.200
-          |
-         SW2
-          |
-     PC2 (10.10.20.10)
+```mermaid
+flowchart LR
+    PC1["PC1\n10.10.10.10/24"]
+    SW1["SW1\nVLAN 100"]
+    R1["R1\ne0/1.100: 10.0.12.1/30\ne0/2.200: 10.0.13.1/30\ne0/0: WAN (DHCP VRF LAB)\nLo0: 1.1.1.1/32"]
+    WAN["WAN / Internet"]
+    SW2["SW2\nVLAN 200"]
+    PC2["PC2\n10.10.20.10/24"]
+
+    PC1 --> SW1
+    SW1 -->|"VLAN 100"| R1
+    R1 -->|"e0/0 outbound\nservice-policy PM-WAN-PARENT"| WAN
+    PC2 --> SW2
+    SW2 -->|"VLAN 200"| R1
 ```
 
 **Punto di applicazione QoS:** R1 interfaccia e0/0 — `service-policy output PM-WAN-PARENT`
@@ -63,11 +64,72 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
+
+> Incollare il blocco direttamente sulla console di R1 (paste manuale).
+
+#### R1
 
 ```
-! Su R1 — le ACL e le class-map sono da configurare nel lab
-R1# copy tftp://192.168.122.1/ENCOR/MOD-26/r1-cfg running-config
+hostname R1
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+no ip domain lookup
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+ip routing
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ vrf forwarding LAB
+ ip address dhcp
+ no shutdown
+!
+interface Ethernet0/1
+ no ip address
+ no shutdown
+!
+interface Ethernet0/1.100
+ encapsulation dot1Q 100
+ ip address 10.0.12.1 255.255.255.252
+ ip ospf 1 area 0
+!
+interface Ethernet0/2
+ no ip address
+ no shutdown
+!
+interface Ethernet0/2.200
+ encapsulation dot1Q 200
+ ip address 10.0.13.1 255.255.255.252
+ ip ospf 1 area 0
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+!
+ip route 10.10.10.0 255.255.255.0 10.0.12.2
+ip route 10.10.10.0 255.255.255.0 10.0.13.2 10
+ip route 10.10.20.0 255.255.255.0 10.0.13.2
+ip route 10.10.20.0 255.255.255.0 10.0.12.2 10
+!
+ip tftp source-interface Ethernet0/0
+no ip http server
+no ip http secure-server
+ip dns view vrf LAB default
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+line con 0
+ logging synchronous
+end
 ```
 
 La configurazione pre-caricata include le interfacce e le rotte statiche di R1. Le policy QoS sono da configurare nel lab.

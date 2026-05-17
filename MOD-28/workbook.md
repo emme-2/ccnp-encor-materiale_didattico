@@ -2,21 +2,25 @@
 
 **Area:** AREA 3 — IP CONNECTIVITY | **Ore:** 3h | **Codici syllabus:** 3.3 · 3.4.d
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+
 ---
 
 ## 1. TOPOLOGIA
 
-```
-                        R2 (RP Candidato / Mapping Agent)
-                       / 10.0.12.0/30     10.0.23.0/30 \
-               R1 ----+                                  +---- R3
-          (FHR)  \     VLAN 12                  VLAN 23 /       (LHR)
-                  \                                            /
-      VLAN 100     \  10.0.13.0/30 (VLAN 13)               VLAN 300
-  192.168.1.0/24   R1 -----------------------------> R3   192.168.3.0/24
-                   |                                   |
-                   R4 (SENDER)                         R5 (RECEIVER)
-              192.168.1.100                       192.168.3.100
+```mermaid
+flowchart LR
+    R4["R4 — SENDER\n192.168.1.100/24\nno ip routing"]
+    R1["R1 — FHR\nLo0: 1.1.1.1/32\ne0/0.12: 10.0.12.1/30\ne0/0.13: 10.0.13.1/30\ne0/0.100: 192.168.1.1/24"]
+    R2["R2 — RP · MA\nLo0: 2.2.2.2/32\ne0/0.12: 10.0.12.2/30\ne0/0.23: 10.0.23.1/30"]
+    R3["R3 — LHR\nLo0: 3.3.3.3/32\ne0/0.13: 10.0.13.2/30\ne0/0.23: 10.0.23.2/30\ne0/0.300: 192.168.3.1/24"]
+    R5["R5 — RECEIVER\n192.168.3.100/24\nip routing abilitato"]
+
+    R4 -->|"VLAN 100 · 192.168.1.0/24"| R1
+    R1 -->|"VLAN 12 · 10.0.12.0/30"| R2
+    R1 -->|"VLAN 13 · 10.0.13.0/30"| R3
+    R2 -->|"VLAN 23 · 10.0.23.0/30"| R3
+    R3 -->|"VLAN 300 · 192.168.3.0/24"| R5
 ```
 
 **Gruppo multicast:** 239.1.1.1 (administratively scoped — privato)
@@ -61,16 +65,193 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
 
-All'avvio del lab, caricare le configurazioni iniziali su ogni router:
+> Incollare ogni blocco direttamente sulla console del device corrispondente (paste manuale).
+
+#### R1
 
 ```
-! Su ogni router (sostituire rX con r1, r2, r3, r4, r5)
-copy tftp://192.168.122.1/ENCOR/MOD-28/rX-cfg running-config
+hostname R1
+no ip domain-lookup
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.1.1 255.255.255.0
+ no shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 192.168.1.0 0.0.0.255 area 0
+ passive-interface Ethernet0/0.100
+end
 ```
 
-Le configurazioni includono: hostname, interfacce, OSPF area 0 underlay, loopback.  
+#### R2
+
+```
+hostname R2
+no ip domain-lookup
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.1 255.255.255.252
+ no shutdown
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+end
+```
+
+#### R3
+
+```
+hostname R3
+no ip domain-lookup
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.2 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.300
+ encapsulation dot1Q 300
+ ip address 192.168.3.1 255.255.255.0
+ no shutdown
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+ network 192.168.3.0 0.0.0.255 area 0
+ passive-interface Ethernet0/0.300
+end
+```
+
+#### R4 (SENDER)
+
+```
+hostname R4-SENDER
+no ip domain-lookup
+no ip routing
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.1.100 255.255.255.0
+ no shutdown
+!
+ip default-gateway 192.168.1.1
+end
+```
+
+#### R5 (RECEIVER)
+
+```
+hostname R5-RECEIVER
+no ip domain-lookup
+ip routing
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.300
+ encapsulation dot1Q 300
+ ip address 192.168.3.100 255.255.255.0
+ no shutdown
+!
+ip route 0.0.0.0 0.0.0.0 192.168.3.1
+end
+```
+
+Le configurazioni includono: hostname, interfacce, OSPF area 0 underlay, loopback.
 **Il multicast non e' pre-configurato** — viene costruito task per task.
 
 ### Prerequisiti

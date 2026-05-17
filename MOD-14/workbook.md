@@ -1,31 +1,27 @@
 # Workbook Studenti — MOD-14: Spanning Tree
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** Layer 2 Technologies | **Ore:** 1h | **Codici syllabus:** 3.1.c
 
 ---
 
 ## 1. TOPOLOGIA
 
-```
-          [WAN / Upstream]
-                |
-           R1 Lo0: 1.1.1.1/32
-          /              \
-     e0/1.100          e0/2.200
-         |                  |
-        SW1               SW2
-   ROOT VLAN 10        ROOT VLAN 20
-   (priority 4096)     (priority 4096)
-   (priority 8192      (priority 8192
-    su VLAN 20)         su VLAN 10)
-         |                  |
-   e0/2 + e0/3 ←─ Po1 ─→ e0/2 + e0/3
-    (Root Guard)         (Root Guard)
-         |                  |
-   e1/0: PC1           e1/0: PC2
-   (PortFast +          (PortFast +
-    BPDU Guard)          BPDU Guard)
-   e1/1: SPAN-dst
+```mermaid
+graph TB
+    R1["**R1** — Router (upstream)\nLo0: 1.1.1.1/32"]
+    SW1["**SW1** — IOU L2\nSVI VLAN10: 10.10.10.2/24\nSVI VLAN20: 10.10.20.3/24\nSTP Root VLAN10 prio 4096\nSTP Secondary VLAN20 prio 8192"]
+    SW2["**SW2** — IOU L2\nSVI VLAN10: 10.10.10.3/24\nSVI VLAN20: 10.10.20.2/24\nSTP Root VLAN20 prio 4096\nSTP Secondary VLAN10 prio 8192"]
+    PC1["PC1\n10.10.10.10/24\nVLAN 10\nPortFast + BPDU Guard"]
+    PC2["PC2\n10.10.20.10/24\nVLAN 20\nPortFast + BPDU Guard"]
+
+    R1 -->|"VLAN 100\ntrunk e0/1"| SW1
+    R1 -->|"VLAN 200\ntrunk e0/1"| SW2
+    SW1 <-->|"Po1 LACP (da MOD-13)\ne0/2+e0/3 trunk VLAN10+20\nRoot Guard su entrambi i lati"| SW2
+    PC1 -->|"e1/0 access VLAN10"| SW1
+    PC2 -->|"e1/0 access VLAN20"| SW2
 ```
 
 ### Piano di indirizzamento
@@ -66,16 +62,164 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
 
-Le configurazioni di MOD-14 includono quelle di MOD-13 (Po1 già configurato):
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+Questi file includono la configurazione di MOD-13 (EtherChannel Po1 già configurato).
+
+#### SW1
 
 ```
-! Su SW1
-SW1# copy tftp://192.168.122.1/ENCOR/MOD-14/sw1-cfg running-config
+! MOD-14 — SW1
+! Stato iniziale: EtherChannel Po1 (LACP) già configurato — da MOD-13 completato
+! Lo studente configura: spanning-tree priority per VLAN, PortFast, BPDU Guard, Root Guard
+!
+hostname SW1
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 100
+ name TRANSIT-R1-SW1
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shutdown
+!
+interface Ethernet0/2
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet0/3
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ no shutdown
+!
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.2 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.3 255.255.255.0
+ no shutdown
+!
+interface Vlan100
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+ip route 0.0.0.0 0.0.0.0 10.0.12.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
+```
 
-! Su SW2
-SW2# copy tftp://192.168.122.1/ENCOR/MOD-14/sw2-cfg running-config
+#### SW2
+
+```
+! MOD-14 — SW2
+! Stato iniziale: EtherChannel Po1 (LACP) già configurato — da MOD-13 completato
+! Lo studente configura: spanning-tree priority per VLAN, PortFast, BPDU Guard, Root Guard
+!
+hostname SW2
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 200
+ name TRANSIT-R1-SW2
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,200
+ no shutdown
+!
+interface Ethernet0/2
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet0/3
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ no shutdown
+!
+interface Ethernet1/1
+ no shutdown
+!
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.3 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.2 255.255.255.0
+ no shutdown
+!
+interface Vlan200
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+!
+ip route 0.0.0.0 0.0.0.0 10.0.13.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
 ```
 
 ### Prerequisiti

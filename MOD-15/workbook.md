@@ -1,28 +1,27 @@
 # Workbook Studenti — MOD-15: FHRP — HSRP, VRRP & GLBP
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** Layer 3 Technologies | **Ore:** 2h | **Codici syllabus:** 3.4.c
 
 ---
 
 ## 1. TOPOLOGIA
 
-```
-          [WAN / Upstream: 1.1.1.1 = R1 Lo0]
-                    |
-               R1 (IOU L3)
-              /             \
-        e0/1.100          e0/2.200
-            |                  |
-           SW1               SW2
-      HSRP Gr.10 ACTIVE   HSRP Gr.20 ACTIVE
-      HSRP Gr.20 Standby  HSRP Gr.10 Standby
-      IP SLA → 1.1.1.1    IP SLA → 1.1.1.1
-      Track 1 → HSRP 10   Track 1 → HSRP 20
-            |                  |
-      e0/2+e0/3 ←─ Po1 ─→ e0/2+e0/3
-            |                  |
-      e1/0: PC1           e1/0: PC2
-      (VLAN 10)           (VLAN 20)
+```mermaid
+graph TB
+    R1["**R1** — Router upstream\nLo0: 1.1.1.1/32 · Target IP SLA\ne0/1.100: 10.0.12.1/30\ne0/2.200: 10.0.13.1/30"]
+    SW1["**SW1** — IOU L2\nVLAN10: 10.10.10.2/24 · HSRP Gr.10 Active prio 110\nVLAN20: 10.10.20.3/24 · HSRP Gr.20 Standby prio 100\nVIP10=10.10.10.1 · VIP20=10.10.20.1\nIP SLA 1→1.1.1.1 / Track 1"]
+    SW2["**SW2** — IOU L2\nVLAN10: 10.10.10.3/24 · HSRP Gr.10 Standby prio 100\nVLAN20: 10.10.20.2/24 · HSRP Gr.20 Active prio 110\nVIP10=10.10.10.1 · VIP20=10.10.20.1\nIP SLA 1→1.1.1.1 / Track 1"]
+    PC1["PC1\n10.10.10.10/24\nGW: 10.10.10.1 (VIP HSRP)\nVLAN 10"]
+    PC2["PC2\n10.10.20.10/24\nGW: 10.10.20.1 (VIP HSRP)\nVLAN 20"]
+
+    R1 -->|"VLAN 100 · 10.0.12.0/30"| SW1
+    R1 -->|"VLAN 200 · 10.0.13.0/30"| SW2
+    SW1 <-->|"Po1 LACP · trunk VLAN10+20\nRoot Guard (da MOD-14)"| SW2
+    PC1 -->|"e1/0 access VLAN10"| SW1
+    PC2 -->|"e1/0 access VLAN20"| SW2
 ```
 
 ### Piano di indirizzamento HSRP
@@ -57,17 +56,231 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
+
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+SW1 e SW2 includono già Po1 LACP + STP da MOD-13/14.
+
+#### R1
 
 ```
-! Su SW1
-SW1# copy tftp://192.168.122.1/ENCOR/MOD-15/sw1-cfg running-config
+! MOD-15 — R1
+! Stato iniziale: identico a MOD-13 — R1 non subisce modifiche nei lab MOD-13/14
+!
+hostname R1
+!
+no ip domain lookup
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+ip routing
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ vrf forwarding LAB
+ ip address dhcp
+ no shutdown
+!
+interface Ethernet0/1
+ no ip address
+ no shutdown
+!
+interface Ethernet0/1.100
+ encapsulation dot1Q 100
+ ip address 10.0.12.1 255.255.255.252
+!
+interface Ethernet0/2
+ no ip address
+ no shutdown
+!
+interface Ethernet0/2.200
+ encapsulation dot1Q 200
+ ip address 10.0.13.1 255.255.255.252
+!
+ip route 10.10.10.0 255.255.255.0 10.0.12.2
+ip route 10.10.10.0 255.255.255.0 10.0.13.2 10
+ip route 10.10.20.0 255.255.255.0 10.0.13.2
+ip route 10.10.20.0 255.255.255.0 10.0.12.2 10
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+line con 0
+ logging synchronous
+!
+end
+```
 
-! Su SW2
-SW2# copy tftp://192.168.122.1/ENCOR/MOD-15/sw2-cfg running-config
+#### SW1
 
-! Su R1 (configurazione pre-lab già completa)
-R1# copy tftp://192.168.122.1/ENCOR/MOD-15/r1-cfg running-config
+```
+! MOD-15 — SW1
+! Stato iniziale: EtherChannel Po1 + STP configurato — da MOD-13+14 completati
+! SW1: root primario VLAN10 (prio 4096), secondario VLAN20 (prio 8192)
+! PortFast + BPDU Guard su e1/0; Root Guard su Po1
+! Lo studente configura: HSRP v2, IP SLA tracking, failover
+!
+hostname SW1
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 100
+ name TRANSIT-R1-SW1
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shutdown
+!
+interface Ethernet0/2
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet0/3
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ spanning-tree guard root
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.2 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.3 255.255.255.0
+ no shutdown
+!
+interface Vlan100
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+spanning-tree vlan 10 priority 4096
+spanning-tree vlan 20 priority 8192
+!
+ip route 0.0.0.0 0.0.0.0 10.0.12.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
+```
+
+#### SW2
+
+```
+! MOD-15 — SW2
+! Stato iniziale: EtherChannel Po1 + STP configurato — da MOD-13+14 completati
+! SW2: root primario VLAN20 (prio 4096), secondario VLAN10 (prio 8192)
+! PortFast + BPDU Guard su e1/0; Root Guard su Po1
+! Lo studente configura: HSRP v2, IP SLA tracking, failover
+!
+hostname SW2
+!
+vrf definition LAB
+ address-family ipv4
+ exit-address-family
+!
+no ip domain lookup
+ip routing
+!
+vlan 10
+ name DATA
+!
+vlan 20
+ name VOICE
+!
+vlan 200
+ name TRANSIT-R1-SW2
+!
+interface Ethernet0/0
+ no switchport
+ vrf forwarding LAB
+ ip address dhcp
+ duplex half
+ no shutdown
+!
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,200
+ no shutdown
+!
+interface Ethernet0/2
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet0/3
+ channel-group 1 mode active
+ no shutdown
+!
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface Ethernet1/1
+ no shutdown
+!
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ spanning-tree guard root
+ no shutdown
+!
+interface Vlan10
+ ip address 10.10.10.3 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ ip address 10.10.20.2 255.255.255.0
+ no shutdown
+!
+interface Vlan200
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+!
+spanning-tree vlan 20 priority 4096
+spanning-tree vlan 10 priority 8192
+!
+ip route 0.0.0.0 0.0.0.0 10.0.13.1
+ip route vrf LAB 0.0.0.0 0.0.0.0 192.168.122.1
+!
+end
 ```
 
 ### Prerequisiti

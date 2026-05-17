@@ -1,5 +1,8 @@
 # Workbook Studenti — MOD-10: MPLS LDP & Fondamenta
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** AREA 4 — MPLS | **Ore:** 2h | **Codici syllabus:** 2.1
 **Prerequisito:** OSPF area 0 pre-configurato su PE1, P1, P2, PE2. Backbone IP già assegnato.
 
@@ -9,18 +12,21 @@
 
 ### Diagramma logico
 
-```
-CE1 ─── PE1 ─── P1 ─── P2 ─── PE2 ─── CE2
-AS65001        backbone (AS65000)        AS65002
-
-Link backbone (OSPF area 0 + MPLS LDP):
-  PE1 Eth0/0.13 ──── P1 Eth0/0.13   10.0.13.0/30
-  P1  Eth0/0.34 ──── P2 Eth0/0.34   10.0.34.0/30
-  P2  Eth0/0.24 ──── PE2 Eth0/0.24  10.0.24.0/30
-
-Loopback (Router-ID / LDP transport):
-  PE1 Lo0 1.1.1.1/32   P1 Lo0 3.3.3.3/32
-  P2  Lo0 4.4.4.4/32   PE2 Lo0 2.2.2.2/32
+```mermaid
+flowchart LR
+    CE1["CE1\nAS 65001\n(fuori scope MOD-10)"]
+    subgraph CORE["AS 65000 — Backbone MPLS"]
+        PE1["**PE1** — Provider Edge\nLo0: 1.1.1.1/32\nEth0/0.13: 10.0.13.1/30\nOSPF area 0 ✅\nLDP da configurare T2"]
+        P1["**P1** — Provider Core\nLo0: 3.3.3.3/32\nEth0/0.13: 10.0.13.2/30\nEth0/0.34: 10.0.34.1/30\nOSPF area 0 ✅\nLDP da configurare T1"]
+        P2["**P2** — Provider Core\nLo0: 4.4.4.4/32\nEth0/0.34: 10.0.34.2/30\nEth0/0.24: 10.0.24.1/30\nOSPF+LDP pre-configurati"]
+        PE2["**PE2** — Provider Edge\nLo0: 2.2.2.2/32\nEth0/0.24: 10.0.24.2/30\nOSPF+LDP pre-configurati"]
+        PE1 -->|"VLAN 13\n10.0.13.0/30"| P1
+        P1 -->|"VLAN 34\n10.0.34.0/30"| P2
+        P2 -->|"VLAN 24\n10.0.24.0/30"| PE2
+    end
+    CE2["CE2\nAS 65002\n(fuori scope MOD-10)"]
+    CE1 -.->|"(MOD-11/12)"| PE1
+    PE2 -.->|"(MOD-11/12)"| CE2
 ```
 
 > In questo modulo lavoriamo solo sul backbone. Le interfacce verso CE1 e CE2
@@ -61,18 +67,169 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
 
-> **ATTENZIONE:** I file cfg TFTP non sono ancora disponibili.
-> Configurare manualmente i dispositivi seguendo le istruzioni nel workbook,
-> oppure usare le configurazioni di base fornite dall'istruttore.
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+
+#### PE1
 
 ```
-! Quando disponibili, caricare con:
-! copy tftp://192.168.122.1/ENCOR/MOD-10/pe1-cfg  running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-10/p1-cfg   running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-10/p2-cfg   running-config
-! copy tftp://192.168.122.1/ENCOR/MOD-10/pe2-cfg  running-config
+! MOD-10 — PE1 (Provider Edge 1)
+! Stato iniziale: OSPF area 0 attivo — MPLS non ancora configurato
+! Lo studente configura: mpls ldp router-id, mpls ip sulle interfacce backbone
+!
+hostname PE1
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### P1
+
+```
+! MOD-10 — P1 (Provider Core 1)
+! Stato iniziale: OSPF area 0 attivo — MPLS non ancora configurato
+! Lo studente configura: mpls label protocol ldp, mpls ldp router-id, mpls ip sulle interfacce
+!
+hostname P1
+!
+no ip domain lookup
+ip routing
+!
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### P2
+
+```
+! MOD-10 — P2 (Provider Core 2)
+! Stato iniziale: OSPF area 0 + MPLS LDP pre-configurati
+! P2 e PE2 sono pre-configurati per permettere la verifica end-to-end
+!
+hostname P2
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 4.4.4.4 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ mpls ip
+!
+interface Ethernet0/0.24
+ encapsulation dot1Q 24
+ ip address 10.0.24.1 255.255.255.252
+ mpls ip
+!
+router ospf 1
+ router-id 4.4.4.4
+ network 4.4.4.4 0.0.0.0 area 0
+ network 10.0.34.0 0.0.0.3 area 0
+ network 10.0.24.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
+```
+
+#### PE2
+
+```
+! MOD-10 — PE2 (Provider Edge 2)
+! Stato iniziale: OSPF area 0 + MPLS LDP pre-configurati
+! PE2 e P2 sono pre-configurati — lo studente completa solo PE1 e P1
+!
+hostname PE2
+!
+no ip domain lookup
+ip routing
+!
+mpls label protocol ldp
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.24
+ encapsulation dot1Q 24
+ ip address 10.0.24.2 255.255.255.252
+ mpls ip
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.24.0 0.0.0.3 area 0
+!
+mpls ldp router-id Loopback0 force
+!
+line con 0
+ logging synchronous
+!
+end
 ```
 
 ### Prerequisiti

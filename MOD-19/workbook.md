@@ -3,39 +3,31 @@
 **Area:** AREA 7 — OVERLAY & VPN | **Ore:** 3h | **Codici syllabus:** 4.6, 4.7, 4.8
 **Prerequisito:** MOD-18 completato — tunnel protection IPSec gia' applicata
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+
 ---
 
 ## 1. TOPOLOGIA
 
 ### Diagramma — DMVPN Cloud
 
-```
-                  ┌───────────────────────────────────────────────────────┐
-                  │                     ISP                                │
-                  └───────┬──────────────────┬───────────────┬─────────────┘
-              VLAN10 /30  │      VLAN20 /30  │   VLAN30 /30  │
-                          │                  │               │
-              ┌───────────┴──────────────────┴───────────────┴─────────┐
-              │              DMVPN Cloud — mGRE + NHRP                  │
-              │                                                          │
-              │  ┌─────────────────────────────────────────────────┐    │
-              │  │              Tunnel110 — VRF CUST-A              │    │
-              │  │         (Tu210 — VRF CUST-B analogamente)        │    │
-              │  │                                                   │    │
-              │  │    [HUB]────────────[SP1]         [SP2]          │    │
-              │  │  172.16.110.1    172.16.110.11  172.16.110.12    │    │
-              │  │       NHS              NHC            NHC         │    │
-              │  │                                                   │    │
-              │  │  Phase 1: SP1↔SP2 sempre via HUB                 │    │
-              │  │  Phase 2: SP1↔SP2 diretto dopo NHRP Redirect     │    │
-              │  │  Phase 3: SP1↔SP2 diretto, routing table compatta│    │
-              │  └─────────────────────────────────────────────────┘    │
-              └──────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    ISP["ISP\nLo0: 192.0.2.253/32"]
 
-  Loopback VRF CUST-A (overlay):
-    HUB  Lo1: 10.1.1.1/32
-    SP1  Lo1: 10.1.2.1/32
-    SP2  Lo1: 10.1.3.1/32
+    subgraph DMVPN["DMVPN Cloud — mGRE + NHRP + IPSec"]
+        HUB["HUB — NHS\nLo1 CUST-A: 10.1.1.1/32\nTu110: 172.16.110.1\nTu210: 172.16.210.1"]
+        SP1["SP1 — NHC\nLo1 CUST-A: 10.1.2.1/32\nTu110: 172.16.110.11\nTu210: 172.16.210.11"]
+        SP2["SP2 — NHC\nLo1 CUST-A: 10.1.3.1/32\nTu110: 172.16.110.12\nTu210: 172.16.210.12"]
+    end
+
+    ISP -->|"VLAN 10 · 192.0.2.0/30"| HUB
+    ISP -->|"VLAN 20 · 198.51.100.0/30"| SP1
+    ISP -->|"VLAN 30 · 203.0.113.0/30"| SP2
+
+    HUB <-->|"Tu110 CUST-A · Tu210 CUST-B\nmGRE + IPSec"| SP1
+    HUB <-->|"Tu110 CUST-A · Tu210 CUST-B\nmGRE + IPSec"| SP2
+    SP1 -.->|"Phase 2/3: shortcut diretto\n(bypass HUB)"| SP2
 ```
 
 ### Piano di indirizzamento — DMVPN Cloud

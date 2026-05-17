@@ -1,5 +1,8 @@
 # Workbook Studenti — MOD-03: OSPFv3 Dual-Stack
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** AREA 1 — OSPF | **Ore:** 1.5h | **Codici syllabus:** 3.2.b
 
 ---
@@ -8,17 +11,32 @@
 
 ### Diagramma logico
 
-```
-                        [Switch1 — IOU L2]
-          ┌──────┬──────┬──────┬──────┬──────┬──────┐
-          R1     R2     R3     R4     R5     R6
+```mermaid
+flowchart LR
+    subgraph A15["Area 15 — ABR: R5"]
+        R1["**R1**\n1.1.1.1\ne0/0.51: 10.1.15.1/30\n2001:db8:15::1/64"]
+    end
+    subgraph A0["Area 0 — Backbone (dual-stack IPv4+IPv6)"]
+        SW(["Switch IOU L2\nVLAN 3456 · 10.0.0.0/29\n2001:db8:0::/64 Broadcast"])
+        R3["**R3** — DROTHER\n3.3.3.3 · 10.0.0.3/29\n2001:db8:0::3"]
+        R4["**R4** — DR prio 255\n4.4.4.4 · 10.0.0.4/29\n2001:db8:0::4"]
+        R5["**R5** — ABR 0/15/25\n5.5.5.5 · 10.0.0.5/29\n2001:db8:0::5"]
+        R6["**R6** — BDR prio 100\n6.6.6.6 · 10.0.0.6/29\n2001:db8:0::6"]
+        R3 --- SW
+        R4 --- SW
+        R5 --- SW
+        R6 --- SW
+        R3 -->|"VLAN 34 · cost 1000"| R4
+        R3 -->|"VLAN 36 · cost 1000"| R6
+        R4 -->|"VLAN 45 · cost 1000"| R5
+        R5 -->|"VLAN 56 · cost 1000"| R6
+    end
+    subgraph A25["Area 25"]
+        R2["**R2**\n2.2.2.2\ne0/0.52: 10.1.25.1/30\n2001:db8:25::1/64"]
+    end
 
-Stessa topologia fisica di MOD-01/02 — dual-stack IPv4 + IPv6 su ogni segmento.
-
-Aree OSPFv3 (identiche alle aree OSPFv2):
-  Area 0:  R3, R4, R5, R6 — VLAN 3456, 34, 36, 45, 56
-  Area 15: R1 ↔ R5 — VLAN 51
-  Area 25: R2 ↔ R5 — VLAN 52
+    R1 -->|"VLAN 51 P2P\n10.1.15.0/30\n2001:db8:15::/64"| R5
+    R5 -->|"VLAN 52 P2P\n10.1.25.0/30\n2001:db8:25::/64"| R2
 ```
 
 ### Tabella di indirizzamento IPv6
@@ -67,22 +85,393 @@ Al termine di questo modulo lo studente sara' in grado di:
 
 ### Prerequisiti
 
-- **MOD-01 completato:** sub-interface configurate, adiacenze OSPFv2 operative
+- **MOD-02 completato:** adiacenze OSPFv2 multi-area operative (Area 0, 15, 25), summarization funzionante
 - IPv4 funzionante su tutti i segmenti — verificare con ping prima di procedere
 - Tutti i router IOU devono supportare `ipv6 unicast-routing` (standard su IOU L3)
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
+
+Incollare manualmente la configurazione su ogni device (paste diretto in CLI).
+
+#### R1
 
 ```
-configure replace tftp://192.168.122.1/ENCOR/MOD-03/r1-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-03/r2-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-03/r3-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-03/r4-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-03/r5-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-03/r6-cfg
+! MOD-03 cfg iniziale — R1
+! Stato: MOD-02 completato + IPv6 indirizzi su sub-interface + ipv6 unicast-routing
+! IPv4 loopbacks Lo150/151/152 presenti. Loopback IPv6 NON configurate (T3).
+! NESSUN processo OSPFv3
+!
+hostname R1
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.51
+ encapsulation dot1Q 51
+ ip address 10.1.15.1 255.255.255.252
+ description P2P_to_R5_Area15
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ ipv6 address 2001:db8:15::1/64
+ ipv6 address fe80::1 link-local
+ no shutdown
+!
+interface ethernet 0/0.17
+ encapsulation dot1Q 17
+ ip address 10.1.17.1 255.255.255.252
+ description P2P_to_R7_Area99
+ no shutdown
+!
+interface loopback 15
+ ip address 192.168.15.1 255.255.255.0
+ description Mgmt_Loopback_R1
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 su Lo15 aggiunto dallo studente in T3
+!
+interface loopback 150
+ ip address 10.15.0.1 255.255.255.0
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 2001:db8:1:150::1/64 aggiunto dallo studente in T3
+!
+interface loopback 151
+ ip address 10.15.1.1 255.255.255.0
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 2001:db8:1:151::1/64 aggiunto dallo studente in T3
+!
+interface loopback 152
+ ip address 10.15.2.1 255.255.255.0
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 2001:db8:1:152::1/64 aggiunto dallo studente in T3
+!
+router ospf 100
+ router-id 1.1.1.1
+ passive-interface default
+ no passive-interface ethernet 0/0.51
+!
+end
 ```
 
-> **NOTA:** I file cfg TFTP non sono ancora disponibili. Placeholder — saranno generati nella prossima versione del modulo. Se si proviene direttamente da MOD-01, la configurazione IPv4 OSPFv2 e' gia' presente — aggiungere solo la configurazione IPv6 e OSPFv3.
+#### R2
+
+```
+! MOD-03 cfg iniziale — R2
+! Stato: MOD-02 completato + IPv6 indirizzi su sub-interface + ipv6 unicast-routing
+! IPv4 loopbacks Lo250/251/252 presenti. Loopback IPv6 NON configurate (T3).
+! NESSUN processo OSPFv3
+!
+hostname R2
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.52
+ encapsulation dot1Q 52
+ ip address 10.1.25.1 255.255.255.252
+ description P2P_to_R5_Area25
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ ipv6 address 2001:db8:25::1/64
+ ipv6 address fe80::2 link-local
+ no shutdown
+!
+interface loopback 25
+ ip address 192.168.25.1 255.255.255.0
+ description Mgmt_Loopback_R2
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+! IPv6 su Lo25 aggiunto dallo studente in T3
+!
+interface loopback 250
+ ip address 10.25.0.1 255.255.255.0
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+!
+interface loopback 251
+ ip address 10.25.1.1 255.255.255.0
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+!
+interface loopback 252
+ ip address 10.25.2.1 255.255.255.0
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ no shutdown
+!
+router ospf 100
+ router-id 2.2.2.2
+ passive-interface default
+ no passive-interface ethernet 0/0.52
+!
+end
+```
+
+#### R3
+
+```
+! MOD-03 cfg iniziale — R3
+! Stato: MOD-01/02 completati + IPv6 indirizzi configurati + ipv6 unicast-routing
+! NESSUN processo OSPFv3 — lo studente lo configura nei task T2-T4
+!
+hostname R3
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.3 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf priority 0
+ ipv6 address 2001:db8:0::3/64
+ ipv6 address fe80::3 link-local
+ no shutdown
+!
+interface ethernet 0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+ description P2P_R3-R4_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:34::3/64
+ ipv6 address fe80::3 link-local
+ no shutdown
+!
+interface ethernet 0/0.36
+ encapsulation dot1Q 36
+ ip address 10.0.36.1 255.255.255.252
+ description P2P_R3-R6_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:36::3/64
+ ipv6 address fe80::3 link-local
+ no shutdown
+!
+router ospf 100
+ router-id 3.3.3.3
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface ethernet 0/0.3456
+ no passive-interface ethernet 0/0.34
+ no passive-interface ethernet 0/0.36
+!
+end
+```
+
+#### R4
+
+```
+! MOD-03 cfg iniziale — R4
+!
+hostname R4
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.4 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf priority 255
+ ipv6 address 2001:db8:0::4/64
+ ipv6 address fe80::4 link-local
+ no shutdown
+!
+interface ethernet 0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ description P2P_R3-R4_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:34::4/64
+ ipv6 address fe80::4 link-local
+ no shutdown
+!
+interface ethernet 0/0.45
+ encapsulation dot1Q 45
+ ip address 10.0.45.1 255.255.255.252
+ description P2P_R4-R5_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:45::4/64
+ ipv6 address fe80::4 link-local
+ no shutdown
+!
+router ospf 100
+ router-id 4.4.4.4
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface ethernet 0/0.3456
+ no passive-interface ethernet 0/0.34
+ no passive-interface ethernet 0/0.45
+!
+end
+```
+
+#### R5
+
+```
+! MOD-03 cfg iniziale — R5
+! R5 = ABR Area 0 / Area 15 / Area 25 (da MOD-02)
+!
+hostname R5
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.5 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf priority 0
+ ipv6 address 2001:db8:0::5/64
+ ipv6 address fe80::5 link-local
+ no shutdown
+!
+interface ethernet 0/0.51
+ encapsulation dot1Q 51
+ ip address 10.1.15.2 255.255.255.252
+ description P2P_to_R1_Area15
+ ip ospf 100 area 15
+ ip ospf network point-to-point
+ ipv6 address 2001:db8:15::5/64
+ ipv6 address fe80::5 link-local
+ no shutdown
+!
+interface ethernet 0/0.52
+ encapsulation dot1Q 52
+ ip address 10.1.25.2 255.255.255.252
+ description P2P_to_R2_Area25
+ ip ospf 100 area 25
+ ip ospf network point-to-point
+ ipv6 address 2001:db8:25::5/64
+ ipv6 address fe80::5 link-local
+ no shutdown
+!
+interface ethernet 0/0.45
+ encapsulation dot1Q 45
+ ip address 10.0.45.2 255.255.255.252
+ description P2P_R4-R5_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:45::5/64
+ ipv6 address fe80::5 link-local
+ no shutdown
+!
+interface ethernet 0/0.56
+ encapsulation dot1Q 56
+ ip address 10.0.56.1 255.255.255.252
+ description P2P_R5-R6_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:56::5/64
+ ipv6 address fe80::5 link-local
+ no shutdown
+!
+router ospf 100
+ router-id 5.5.5.5
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface ethernet 0/0.3456
+ no passive-interface ethernet 0/0.51
+ no passive-interface ethernet 0/0.52
+ no passive-interface ethernet 0/0.45
+ no passive-interface ethernet 0/0.56
+!
+end
+```
+
+#### R6
+
+```
+! MOD-03 cfg iniziale — R6
+!
+hostname R6
+no ip domain-lookup
+!
+ipv6 unicast-routing
+!
+interface ethernet 0/0
+ no ip address
+ no shutdown
+!
+interface ethernet 0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.6 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf priority 100
+ ipv6 address 2001:db8:0::6/64
+ ipv6 address fe80::6 link-local
+ no shutdown
+!
+interface ethernet 0/0.36
+ encapsulation dot1Q 36
+ ip address 10.0.36.2 255.255.255.252
+ description P2P_R3-R6_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:36::6/64
+ ipv6 address fe80::6 link-local
+ no shutdown
+!
+interface ethernet 0/0.56
+ encapsulation dot1Q 56
+ ip address 10.0.56.2 255.255.255.252
+ description P2P_R5-R6_Ring_Area0
+ ip ospf 100 area 0
+ ip ospf network point-to-point
+ ip ospf cost 1000
+ ipv6 address 2001:db8:56::6/64
+ ipv6 address fe80::6 link-local
+ no shutdown
+!
+router ospf 100
+ router-id 6.6.6.6
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface ethernet 0/0.3456
+ no passive-interface ethernet 0/0.36
+ no passive-interface ethernet 0/0.56
+!
+end
+```
 
 ### Verifica pre-lab
 

@@ -3,6 +3,8 @@
 **Area:** AREA 7 — OVERLAY & VPN | **Ore:** 2h | **Codici syllabus:** 4.4, 4.5
 **Prerequisito:** MOD-17 completato — stessa topologia, stessi cfg di partenza
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+
 ---
 
 ## 1. TOPOLOGIA
@@ -11,29 +13,19 @@ La topologia e' identica a MOD-17. I cfg di partenza includono gia' VRF CUST-A/C
 
 **Nuovo in questo modulo:** aggiunta di tunnel protection IPSec su Tu101 (HUB↔SP1) e Tu102 (HUB↔SP2).
 
-```
-                  ┌───────────────────────────────────────────────────────┐
-                  │                ISP  (Simulated Internet)               │
-                  └───────┬──────────────────┬───────────────┬─────────────┘
-              VLAN10 /30  │      VLAN20 /30  │   VLAN30 /30  │
-                          │                  │               │
-              ┌───────────┴──┐   ┌───────────┴──┐  ┌────────┴──────┐
-              │     HUB      │   │     SP1       │  │     SP2       │
-              │ Lo0:         │   │ Lo0:          │  │ Lo0:          │
-              │ 192.0.2.254  │   │ 198.51.100.254│  │ 203.0.113.254 │
-              └──────────────┘   └───────────────┘  └───────────────┘
-                    │                   │                   │
-                    └─── Tu101 GRE+ESP ─┘                   │
-                    │   172.16.101.0/30                     │
-                    └─────────── Tu102 GRE+ESP ─────────────┘
-                        172.16.102.0/30
+```mermaid
+flowchart LR
+    ISP["ISP\nLo0: 192.0.2.253/32"]
+    HUB["HUB\nLo0: 192.0.2.254/32\nLo1 CUST-A: 10.1.1.1/32"]
+    SP1["SP1\nLo0: 198.51.100.254/32\nLo1 CUST-A: 10.1.2.1/32"]
+    SP2["SP2\nLo0: 203.0.113.254/32\nLo1 CUST-A: 10.1.3.1/32\nIPSec pre-configurato"]
 
-  Tunnel protection IPSec:
-    Tu101 HUB↔SP1: IPSEC-PROF (IKEv2 + AES-256 + SHA-256 + DH14)
-    Tu102 HUB↔SP2: IPSEC-PROF (idem — SP2 pre-configurato come reference)
+    ISP -->|"VLAN 10 · 192.0.2.0/30"| HUB
+    ISP -->|"VLAN 20 · 198.51.100.0/30"| SP1
+    ISP -->|"VLAN 30 · 203.0.113.0/30"| SP2
 
-  Flusso pacchetto:
-    [VRF CUST-A payload] → [GRE header] → [ESP cipher+auth] → [outer IP Lo0→Lo0]
+    HUB -.->|"Tu101 GRE+ESP · 172.16.101.0/30\nIKEv2 + AES-256 + SHA-256"| SP1
+    HUB -.->|"Tu102 GRE+ESP · 172.16.102.0/30\nIPSec reference su SP2"| SP2
 ```
 
 ### Piano di indirizzamento (invariato da MOD-17)
@@ -71,7 +63,7 @@ Al termine di questo modulo lo studente sara' in grado di:
 
 MOD-17 completato su tutti i router. I cfg di partenza di MOD-18 sono gli stessi di MOD-17 con l'aggiunta della configurazione IPSec completa su SP2 (reference).
 
-Se si riparte da zero (nuova sessione):
+Se si riparte da zero (nuova sessione), caricare le configurazioni di MOD-17 (inline cfg disponibili in `MOD-17/workbook.md` Sezione 3) oppure via TFTP:
 ```
 HUB# copy tftp://192.168.122.1/ENCOR/MOD-17/hub-cfg running-config
 SP1# copy tftp://192.168.122.1/ENCOR/MOD-17/sp1-cfg running-config

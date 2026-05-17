@@ -1,5 +1,7 @@
 # MAPPATURA LAB — CCNP ENCOR 350-401
-Generato: 2026-05-12 | Aggiornato: 2026-05-14 | Riferimento programma: CCNP_ENCOR_Programma_v2.docx (v1.2, 11 sessioni · 43h · Mar–Mag 2026)
+Generato: 2026-05-12 | Aggiornato: 2026-05-17 | Riferimento programma: CCNP_ENCOR_Programma_v2.docx (v1.2, 11 sessioni · 43h · Mar–Mag 2026)
+
+> **Uniformazione Fase 2 completata 2026-05-17:** tutti i workbook LAB (MOD-01÷MOD-19, MOD-26÷MOD-31) aggiornati con topologie Mermaid, cfg inline e nota piattaforme. Anomalie residue: MOD-18/MOD-19 senza cfg standalone propri (vedi QA_REPORT.md BLK-01/02).
 
 ---
 

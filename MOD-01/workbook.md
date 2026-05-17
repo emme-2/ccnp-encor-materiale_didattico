@@ -1,6 +1,10 @@
 # Workbook Studenti — MOD-01: OSPFv2 Fondamenta
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+> Le configurazioni iniziali sono integrate nel workbook — caricamento via paste manuale.
+
 **Area:** AREA 1 — OSPF | **Ore:** 2h | **Codici syllabus:** 3.2.a · 3.2.b
+**Prerequisiti:** Nessuno (modulo introduttivo)
 
 ---
 
@@ -8,23 +12,37 @@
 
 ### Diagramma logico
 
-```
-                        [Switch1 — IOU L2]
-          ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┐
-          R1     R2     R3     R4     R5     R6     R7
-          |             |      |      |      |
-          |         VLAN 3456 — Core Broadcast (Area 0)
-          |             └──10.0.0.x/29──────────────┘
-          |
-          └── VLAN 51 ──► R5   (Area 15, 10.1.15.0/30)
-          R2 ─── VLAN 52 ──► R5   (Area 25, 10.1.25.0/30)
-          R1 ─── VLAN 17 ──► R7   (Area 99, 10.1.17.0/30)
+```mermaid
+flowchart LR
+    subgraph A99["Area 99"]
+        R7["**R7**\n7.7.7.7\n10.1.17.2/30"]
+    end
+    subgraph A15["Area 15"]
+        R1["**R1** — ABR 0/15/99\n1.1.1.1 · Lo15:192.168.15.1\n10.1.15.1/30"]
+    end
+    subgraph A25["Area 25"]
+        R2["**R2** — ABR 0/25\n2.2.2.2 · Lo25:192.168.25.1\n10.1.25.1/30"]
+    end
+    subgraph A0["Area 0 — Backbone"]
+        R3["**R3** — DR candidato\n3.3.3.3\nBcast 10.0.0.3/29"]
+        R4["**R4** ⚠ area mismatch\n4.4.4.4\nBcast 10.0.0.4/29"]
+        R5["**R5** — ABR 0/15/25\n5.5.5.5 ⚠ MD5 errata\nBcast 10.0.0.5/29"]
+        R6["**R6** — riferimento OK\n6.6.6.6\nBcast 10.0.0.6/29"]
+    end
 
-Core Ring (Area 0):
-  R3 ──[VLAN 34]── R4   10.0.34.0/30
-  R3 ──[VLAN 36]── R6   10.0.36.0/30
-  R4 ──[VLAN 45]── R5   10.0.45.0/30
-  R5 ──[VLAN 56]── R6   10.0.56.0/30
+    R1 -- "VLAN 17\n10.1.17.0/30" --- R7
+    R1 -- "VLAN 51\n10.1.15.0/30" --- R5
+    R2 -- "VLAN 52\n10.1.25.0/30" --- R5
+    R3 -. "VLAN 3456 Broadcast\n10.0.0.x/29" .- R4
+    R3 -. "VLAN 3456 Broadcast" .- R5
+    R3 -. "VLAN 3456 Broadcast" .- R6
+    R4 -. "VLAN 3456 Broadcast" .- R5
+    R4 -. "VLAN 3456 Broadcast" .- R6
+    R5 -. "VLAN 3456 Broadcast" .- R6
+    R3 -- "VLAN 34 P2P\n10.0.34.0/30" --- R4
+    R3 -- "VLAN 36 P2P\n10.0.36.0/30" --- R6
+    R4 -- "VLAN 45 P2P\n10.0.45.0/30" --- R5
+    R5 -- "VLAN 56 P2P\n10.0.56.0/30" --- R6
 ```
 
 **Ruoli OSPF:**
@@ -78,21 +96,247 @@ Al termine di questo modulo lo studente sarà in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
 
-> **Attenzione:** la configurazione iniziale include missconfiguration intenzionali su R3, R4, R5 per il troubleshooting del Task A2. NON consultare la sezione Soluzioni prima di completare il Task A2.
+> ⚠ **Attenzione:** Le cfg di R4 e R5 contengono missconfiguration intenzionali per il Task T2. NON consultare `soluzione.md` prima di completare T2.
 
+Carica le configurazioni tramite **paste manuale** in modalità config, oppure via TFTP:
 ```
-configure replace tftp://192.168.122.1/ENCOR/MOD-01/r1-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-01/r2-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-01/r3-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-01/r4-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-01/r5-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-01/r6-cfg
-configure replace tftp://192.168.122.1/ENCOR/MOD-01/r7-cfg
+copy tftp://192.168.122.1/ENCOR/MOD-01/rx-cfg running-config
 ```
 
-> **NOTA:** I file cfg TFTP non sono ancora disponibili. Placeholder — saranno generati nella prossima versione del modulo.
+#### R1
+```
+! MOD-01 cfg iniziale — R1
+! Piattaforme: GNS3 · ContainerLab · EVE-NG
+hostname R1
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.51
+ encapsulation dot1Q 51
+ ip address 10.1.15.1 255.255.255.252
+ description P2P_to_R5_Area15
+ no shutdown
+!
+interface Ethernet0/0.17
+ encapsulation dot1Q 17
+ ip address 10.1.17.1 255.255.255.252
+ description P2P_to_R7_Area99
+ no shutdown
+!
+interface Loopback15
+ ip address 192.168.15.1 255.255.255.0
+ description Mgmt_Loopback_R1
+!
+end
+```
+
+#### R2
+```
+! MOD-01 cfg iniziale — R2
+hostname R2
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.52
+ encapsulation dot1Q 52
+ ip address 10.1.25.1 255.255.255.252
+ description P2P_to_R5_Area25
+ no shutdown
+!
+interface Loopback25
+ ip address 192.168.25.1 255.255.255.0
+ description Mgmt_Loopback_R2
+!
+end
+```
+
+#### R3
+```
+! MOD-01 cfg iniziale — R3
+! R3 = router di riferimento per Task T1 — nessun processo OSPF (da configurare)
+hostname R3
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.3 255.255.255.248
+ description Core_Broadcast_Area0
+ no shutdown
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.1 255.255.255.252
+ description P2P_R3-R4_Ring_Area0
+ no shutdown
+!
+interface Ethernet0/0.36
+ encapsulation dot1Q 36
+ ip address 10.0.36.1 255.255.255.252
+ description P2P_R3-R6_Ring_Area0
+ no shutdown
+!
+end
+```
+
+#### R4
+```
+! MOD-01 cfg iniziale — R4
+! *** MISSCONFIGURATION INTENZIONALE per Task T2 ***
+! Errore: e0/0.3456 in area 1 (deve essere area 0)
+hostname R4
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.4 255.255.255.248
+ description Core_Broadcast_Area0
+ no shutdown
+!
+interface Ethernet0/0.34
+ encapsulation dot1Q 34
+ ip address 10.0.34.2 255.255.255.252
+ description P2P_R3-R4_Ring_Area0
+ no shutdown
+!
+interface Ethernet0/0.45
+ encapsulation dot1Q 45
+ ip address 10.0.45.1 255.255.255.252
+ description P2P_R4-R5_Ring_Area0
+ no shutdown
+!
+router ospf 100
+ router-id 4.4.4.4
+ network 10.0.0.0 0.0.0.7 area 1
+ passive-interface default
+ no passive-interface Ethernet0/0.3456
+!
+end
+```
+
+#### R5
+```
+! MOD-01 cfg iniziale — R5
+! *** MISSCONFIGURATION INTENZIONALE per Task T2 ***
+! Errore: ip ospf authentication message-digest su e0/0.3456 (MD5 non configurato sugli altri)
+hostname R5
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.5 255.255.255.248
+ description Core_Broadcast_Area0
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 WRONG_KEY
+ no shutdown
+!
+interface Ethernet0/0.51
+ encapsulation dot1Q 51
+ ip address 10.1.15.2 255.255.255.252
+ description P2P_to_R1_Area15
+ no shutdown
+!
+interface Ethernet0/0.52
+ encapsulation dot1Q 52
+ ip address 10.1.25.2 255.255.255.252
+ description P2P_to_R2_Area25
+ no shutdown
+!
+interface Ethernet0/0.45
+ encapsulation dot1Q 45
+ ip address 10.0.45.2 255.255.255.252
+ description P2P_R4-R5_Ring_Area0
+ no shutdown
+!
+interface Ethernet0/0.56
+ encapsulation dot1Q 56
+ ip address 10.0.56.1 255.255.255.252
+ description P2P_R5-R6_Ring_Area0
+ no shutdown
+!
+router ospf 100
+ router-id 5.5.5.5
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface Ethernet0/0.3456
+!
+end
+```
+
+#### R6
+```
+! MOD-01 cfg iniziale — R6 (configurazione corretta — usare come riferimento per T2)
+hostname R6
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.3456
+ encapsulation dot1Q 3456
+ ip address 10.0.0.6 255.255.255.248
+ description Core_Broadcast_Area0
+ no shutdown
+!
+interface Ethernet0/0.36
+ encapsulation dot1Q 36
+ ip address 10.0.36.2 255.255.255.252
+ description P2P_R3-R6_Ring_Area0
+ no shutdown
+!
+interface Ethernet0/0.56
+ encapsulation dot1Q 56
+ ip address 10.0.56.2 255.255.255.252
+ description P2P_R5-R6_Ring_Area0
+ no shutdown
+!
+router ospf 100
+ router-id 6.6.6.6
+ network 10.0.0.0 0.0.0.7 area 0
+ passive-interface default
+ no passive-interface Ethernet0/0.3456
+!
+end
+```
+
+#### R7
+```
+! MOD-01 cfg iniziale — R7
+hostname R7
+no ip domain-lookup
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.17
+ encapsulation dot1Q 17
+ ip address 10.1.17.2 255.255.255.252
+ description P2P_to_R1_Area99
+ no shutdown
+!
+end
+```
 
 ### Prerequisiti
 

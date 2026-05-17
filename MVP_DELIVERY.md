@@ -1,6 +1,6 @@
 # MVP DELIVERY — Materiale CCNP ENCOR 350-401
 
-> Prodotto: 2026-05-14 · Versione: 1.0-MVP
+> Prodotto: 2026-05-14 · Versione: 1.0-MVP · Uniformazione Fase 2: 2026-05-17
 
 ---
 
@@ -177,13 +177,15 @@ Moduli al momento non sviluppati (solo struttura placeholder):
 > **Come usare i workbook:**
 >
 > - Ogni modulo è autonomo: contiene teoria, istruzioni operative e verifica
-> - Le configurazioni iniziali si caricano via TFTP:
+> - Le configurazioni iniziali sono disponibili **direttamente nel workbook** nella
+>   sezione **3 — LAB SETUP** → Configurazione Iniziale. Incollare ogni blocco
+>   sulla console del device corrispondente (paste manuale).
+> - Alternativa TFTP (se il server 192.168.122.1 è attivo):
 >   ```
 >   Router# copy tftp: running-config
 >   Address or name of remote host? 192.168.122.1
 >   Source filename? ENCOR/MOD-xx/device-cfg
 >   ```
-> - Il path TFTP esatto è indicato nella sezione **3 — LAB SETUP** di ogni workbook
 > - Leggi sempre la sezione **TEORIA** prima di iniziare i task: spiega il *perché*
 >   prima del *come*
 > - Usa i comandi di **VERIFICA** dopo ogni task per confermare il risultato atteso

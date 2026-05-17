@@ -24,5 +24,7 @@ MVP_DELIVERY.pdf
 *.zip
 !MOD-32/ENCOR-LAB10-repo.zip
 
+#Note
+note
 # Node
 node_modules/

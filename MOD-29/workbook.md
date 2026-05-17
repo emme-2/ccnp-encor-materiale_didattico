@@ -2,26 +2,29 @@
 
 **Area:** AREA 4 — INFRASTRUCTURE SERVICES | **Ore:** 2h | **Codici syllabus:** 4.1 · 4.2 · 4.3 · 4.4 · 4.5 · 4.6
 
+> **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
+
 ---
 
 ## 1. TOPOLOGIA
 
 La topologia e' identica a MOD-28 (stessa rete, stessi cfg iniziali). In questo modulo i router svolgono il ruolo di dispositivi da monitorare.
 
-```
-                        R2
-                       / \
-               R1 ----+   +---- R3
-          (probe FNF)  \   /
-                        \ /
-      VLAN 100        VLAN 13        VLAN 300
-  192.168.1.0/24   10.0.13.0/30  192.168.3.0/24
-        |                               |
-       R4                              R5
-   (generatore                    (destinazione
-    traffico)                       traffico)
+```mermaid
+flowchart LR
+    R4["R4 — generatore traffico\n192.168.1.100/24"]
+    R1["R1 — sonda FNF\nLo0: 1.1.1.1/32\ne0/0.12: 10.0.12.1/30\ne0/0.13: 10.0.13.1/30\ne0/0.100: 192.168.1.1/24"]
+    R2["R2\nLo0: 2.2.2.2/32\ne0/0.12: 10.0.12.2/30\ne0/0.23: 10.0.23.1/30"]
+    R3["R3\nLo0: 3.3.3.3/32\ne0/0.13: 10.0.13.2/30\ne0/0.23: 10.0.23.2/30\ne0/0.300: 192.168.3.1/24"]
+    R5["R5 — destinazione\n192.168.3.100/24"]
+    COLL["VM GNS3\n192.168.122.1\nCollector FNF\nSNMP Manager"]
 
-  Collector NetFlow / SNMP manager: 192.168.122.1 (VM GNS3)
+    R4 -->|"VLAN 100 · 192.168.1.0/24"| R1
+    R1 -->|"VLAN 12 · 10.0.12.0/30"| R2
+    R1 -->|"VLAN 13 · 10.0.13.0/30"| R3
+    R2 -->|"VLAN 23 · 10.0.23.0/30"| R3
+    R3 -->|"VLAN 300 · 192.168.3.0/24"| R5
+    R1 -.->|"UDP 9996 · SNMP"| COLL
 ```
 
 ### Tabella Indirizzamento
@@ -63,11 +66,189 @@ Al termine di questo modulo lo studente sara' in grado di:
 
 ## 3. LAB SETUP
 
-### File cfg da caricare via TFTP
+### Configurazione Iniziale
+
+> Incollare ogni blocco direttamente sulla console del device corrispondente (paste manuale).
+
+#### R1
 
 ```
-! Su ogni router (sostituire rX con r1, r2, r3, r4, r5)
-copy tftp://192.168.122.1/ENCOR/MOD-29/rX-cfg running-config
+hostname R1
+no ip domain-lookup
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.1 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.1 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.1.1 255.255.255.0
+ no shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 192.168.1.0 0.0.0.255 area 0
+ passive-interface Ethernet0/0.100
+end
+```
+
+#### R2
+
+```
+hostname R2
+no ip domain-lookup
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.12
+ encapsulation dot1Q 12
+ ip address 10.0.12.2 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.1 255.255.255.252
+ no shutdown
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+end
+```
+
+#### R3
+
+```
+hostname R3
+no ip domain-lookup
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+line vty 0 4
+ logging synchronous
+ exec-timeout 0 0
+ login
+!
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ no shutdown
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.13
+ encapsulation dot1Q 13
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.23
+ encapsulation dot1Q 23
+ ip address 10.0.23.2 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/0.300
+ encapsulation dot1Q 300
+ ip address 192.168.3.1 255.255.255.0
+ no shutdown
+!
+router ospf 1
+ router-id 3.3.3.3
+ network 3.3.3.3 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.23.0 0.0.0.3 area 0
+ network 192.168.3.0 0.0.0.255 area 0
+ passive-interface Ethernet0/0.300
+end
+```
+
+#### R4 (generatore traffico)
+
+```
+hostname R4
+no ip domain-lookup
+no ip routing
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.1.100 255.255.255.0
+ no shutdown
+!
+ip default-gateway 192.168.1.1
+end
+```
+
+#### R5 (destinazione traffico)
+
+```
+hostname R5
+no ip domain-lookup
+!
+line con 0
+ logging synchronous
+ exec-timeout 0 0
+!
+interface Ethernet0/0
+ no ip address
+ no shutdown
+!
+interface Ethernet0/0.300
+ encapsulation dot1Q 300
+ ip address 192.168.3.100 255.255.255.0
+ no shutdown
+!
+ip route 0.0.0.0 0.0.0.0 192.168.3.1
+end
 ```
 
 Le configurazioni includono: hostname, interfacce, OSPF area 0 underlay.
