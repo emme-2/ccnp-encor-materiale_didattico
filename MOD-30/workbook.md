@@ -590,3 +590,14 @@ R1# configure terminal
    - b) IOS chiede la password di enable
    - c) L'utente viene promosso automaticamente al livello 15
    - d) Il comando funziona sempre indipendentemente dal privilege level
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

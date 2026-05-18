@@ -543,3 +543,14 @@ Vedere il file `soluzione.md` nella stessa cartella per le configurazioni comple
 3. Una porta trunk con PortFast attivo: cosa succede e perché è comunque errato?
 4. In RSTP, quali sono i tre stati delle porte e i quattro ruoli?
 5. SW1 ha priority 4096 su VLAN 10 e SW2 ha priority 4096 su VLAN 10 — chi diventa root?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

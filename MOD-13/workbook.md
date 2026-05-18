@@ -485,3 +485,14 @@ Vedere il file `soluzione.md` nella stessa cartella per le configurazioni comple
 3. Perché si preferisce LACP rispetto alla modalità `on` in ambienti di produzione?
 4. In `show etherchannel summary`, cosa significano i flag `SU`, `P` e `D`?
 5. È possibile avere porte fisiche in modalità LACP `active` e altre in modalità `on` nello stesso Port-Channel?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

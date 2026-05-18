@@ -1022,3 +1022,14 @@ R5# show ip ospf database external
 
 4. Su R5 (ABR), si vede `O IA 10.15.0.0/22` ma non le singole /24 di Area 15. Quale comando ha generato questo comportamento?
    > **Risposta:** `area 15 range 10.15.0.0 255.255.252.0` nel processo OSPF di R5. Il comando aggrega i prefissi dell'area prima di annunciarli verso Area 0.
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

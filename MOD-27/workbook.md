@@ -691,3 +691,14 @@ R-GW# show ip nat translations
    - b) Dynamic NAT usa porte; PAT usa IP diversi
    - **c) Dynamic NAT assegna IP diversi dal pool; PAT usa un singolo IP con porte diverse**
    - d) PAT funziona solo per TCP; Dynamic NAT anche per UDP
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

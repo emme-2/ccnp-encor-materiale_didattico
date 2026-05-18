@@ -529,3 +529,14 @@ Se disponibile un ambiente dCloud con Catalyst Center:
 - Demo "Cisco DNA Center 2.x API" disponibile su dCloud
 - Mostrare live la GUI Catalyst Center + chiamate API via Postman
 - Durata consigliata demo: 15 min (dentro questo modulo da 1.5h)
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

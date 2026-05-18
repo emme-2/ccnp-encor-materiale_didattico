@@ -948,3 +948,14 @@ Voglio comunicare policy a un altro AS in modo automatico?
    - **b) Il soft reset non e' stato eseguito: `clear ip bgp 172.16.35.1 soft out`**
    - c) L'AS-Path Prepend funziona solo su iBGP
    - d) Il prepend e' troppo lungo (serve massimo 1 hop)
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

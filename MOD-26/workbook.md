@@ -576,3 +576,14 @@ Vedere il file `soluzione.md` nella stessa cartella per le configurazioni comple
 3. Perché lo shaping va nella parent policy e non nella child accanto a `priority`?
 4. Cos'è la trust boundary? Perché il marking dovrebbe avvenire il più vicino possibile alla sorgente?
 5. Un pacchetto DSCP EF entra su R1 da PC1 (VPCS, DSCP=0). La class-map CM-VOICE matcha? Perché?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

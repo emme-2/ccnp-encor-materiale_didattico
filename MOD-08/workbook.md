@@ -856,3 +856,14 @@ Entrambi devono rispondere — il tag non ha interrotto la raggiungibilità, sol
 3. In un design con due ASBR che redistribuiscono tra BGP e OSPF, come si previene il loop di redistribuzione?
 4. Perché è necessaria la keyword `subnets` in `redistribute bgp X metric Y metric-type 1 subnets`?
 5. Un prefix-list con `seq 10 permit 10.0.0.0/8 le 24` matcha `10.10.0.0/24`? E `10.10.0.0/25`?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

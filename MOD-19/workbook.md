@@ -867,3 +867,14 @@ Vedi file `MOD-19/soluzione.md` per configurazione completa HUB/SP1/SP2.
    - B) Una entry NHRP statica per SP2
    - **C) Una entry NHRP /32 dynamic per SP2 con NBMA address di SP2** ← corretto
    - D) Nulla — Phase 3 non installa entry NHRP sullo spoke
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

@@ -834,3 +834,14 @@ ip pim rp-candidate Loopback0 group-list 239.0.0.0/8  ! Candidate RP
 
 5. Dopo lo SPT switchover in PIM-SM, quale entry rimane nell'LHR e quale flag lo indica?
    - *Rimangono (\*,G) con flag T e (S,G) con flag T. Il flag T indica che l'SPT e' attivo.*
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

@@ -959,3 +959,14 @@ Se WAN-B cade, quell'IP non è più utilizzabile → SLA fallisce → track Down
 3. Qual è l'AD default di eBGP? Cosa succede se configuro `distance bgp 150 200 200`?
 4. Una floating static route con AD=90 è impostata per una rete appresa via OSPF (AD=110). La rotta è veramente "flottante"?
 5. Con `track 1 ip sla 1 reachability`, quando il track diventa Down?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

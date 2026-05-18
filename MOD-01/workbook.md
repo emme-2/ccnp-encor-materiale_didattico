@@ -853,3 +853,14 @@ R5# show ip ospf interface ethernet 0/0.51
 
 4. Qual e' la differenza tra `passive-interface` e `ip ospf network point-to-point` applicato a una loopback?
    > **Risposta:** `passive-interface` blocca l'invio di Hello (nessuna adiacenza), ma il prefisso viene comunque annunciato. `ip ospf network point-to-point` su loopback consente al prefisso di essere annunciato come /24 invece del /32 di default, ma non e' utile per la gestione degli Hello.
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

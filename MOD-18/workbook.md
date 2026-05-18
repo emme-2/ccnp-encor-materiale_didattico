@@ -560,3 +560,14 @@ Vedi file `MOD-18/soluzione.md` per configurazione completa HUB e SP1.
    - B) Transform-set non corrispondente
    - **C) Il peer remoto non ha applicato tunnel protection sul suo tunnel** ← corretto — il traffico esce cifrato ma non torna cifrato
    - D) DH group non corrispondente
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

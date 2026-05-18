@@ -1078,3 +1078,14 @@ R5# show ospfv3 100 ipv6 database
 
 4. In OSPFv3, perche' e' necessario configurare un Router-ID IPv4 anche su un router che ha solo indirizzamento IPv6?
    > **Risposta:** Il Router-ID in OSPF (v2 e v3) e' sempre un valore a 32 bit in formato IPv4. OSPFv3 eredita questa convenzione. Se non c'e' nessun indirizzo IPv4 configurato, il Router-ID deve essere impostato esplicitamente con `router-id x.x.x.x`, altrimenti il processo non parte.
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

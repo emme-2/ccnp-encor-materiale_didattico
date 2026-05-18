@@ -210,3 +210,14 @@ Se il tempo lo permette (30 min aggiuntivi), mostrare la demo Catalyst Center su
 - La sessione e' puramente teorica — nessun terminale aperto
 - Se gli studenti chiedono perche' non si fa lab: IOU non implementa LISP Data Plane ne' il processo ETR/ITR completo; VXLAN richiede hardware specifico (ASR/Catalyst) o containerlab con immagini supportate
 - Per containerlab (futura migrazione): le immagini Cisco CSR1000v o Cat8000v supportano LISP e VXLAN — annotare come potenziale upgrade futuro del corso
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

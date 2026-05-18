@@ -722,3 +722,14 @@ router bgp 65000
 3. Cosa succede se `send-community extended` manca su un solo PE?
 4. Un router P nel backbone vede la VPN label? Perché?
 5. In uno scenario hub-and-spoke come si configurano RT import/export diversamente?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

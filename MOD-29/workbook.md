@@ -713,3 +713,13 @@ snmpwalk -v3 -u ENCOR-USER -l authPriv -a SHA -A "Cisco123!" -x AES -X "Cisco123
 
 6. Perche' le credenziali SNMPv3 non compaiono in chiaro nel `show running-config`?
    - *Vengono memorizzate nel database USM locale derivate tramite HMAC — non sono reversibili. Visibili con `show snmp user`.*
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

@@ -1202,3 +1202,14 @@ Reference card — sintomi OSPF più comuni.
 
 5. In OSPFv3, qual è il requisito minimo perché un prefisso IPv6 venga annunciato nella LSDB?
    - a) `network` nel processo   b) `ipv6 ospf <pid> area <area>` sull'interfaccia ✓   c) `ipv6 ospf advertise`   d) `redistribute connected`
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

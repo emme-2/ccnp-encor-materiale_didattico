@@ -974,3 +974,14 @@ R5# clear ip bgp 172.16.35.1 soft
    - **b) Il primo abbatte la sessione TCP; il secondo ri-processa le route senza abbatterla**
    - c) Il soft e' piu' veloce perche' non aggiorna la routing table
    - d) Il soft funziona solo per eBGP
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

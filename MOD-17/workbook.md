@@ -947,3 +947,14 @@ Vedi file `MOD-17/soluzione.md` per la configurazione completa e i fix dei bug.
    - **B) `show ip vrf interfaces`** ← corretto
    - C) `show ip interface brief vrf CUST-A`
    - D) `show ip route vrf CUST-A`
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

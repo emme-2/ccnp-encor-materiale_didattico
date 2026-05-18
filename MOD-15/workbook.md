@@ -775,3 +775,14 @@ Vedere il file `soluzione.md` nella stessa cartella per le configurazioni comple
 3. Qual è il virtual MAC generato da HSRPv2 per il gruppo 20?
 4. Con IP SLA frequency 5s e HSRP hold timer 3s, qual è il worst-case di packet loss durante il failover?
 5. In VRRP, se l'IP virtuale coincide con l'IP reale del Master, cosa cambia nel comportamento?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

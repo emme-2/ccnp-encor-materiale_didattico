@@ -606,3 +606,14 @@ interface Ethernet0/0.202
 3. Qual è la differenza tra il VC-ID e la VC label?
 4. Se il VC-ID su PE1 è 101 e su PE2 è 102, cosa succede al pseudowire?
 5. In che modo il provider garantisce separazione tra pseudowire di clienti diversi?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

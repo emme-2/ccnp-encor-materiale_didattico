@@ -571,3 +571,14 @@ interface Ethernet0/0.13
 3. Un router P nel backbone vede mai l'indirizzo IP destination del payload customer?
 4. Se OSPF non è convergente, LDP si alza ugualmente? Perché?
 5. Quante label ha un pacchetto MPLS puro (solo LDP, nessuna VPN) a metà del backbone?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

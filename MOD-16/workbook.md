@@ -771,3 +771,14 @@ Vedere il file `soluzione.md` nella stessa cartella per le configurazioni comple
 3. RSPAN VLAN: cosa succede se non si aggiunge il flag `remote-span`?
 4. ERSPAN usa quale protocollo di trasporto e quale numero IP?
 5. IP SLA `udp-jitter`: cosa misura e per quale applicazione è particolarmente utile?
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

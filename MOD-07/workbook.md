@@ -879,3 +879,14 @@ Output atteso `show bgp ipv6 unicast` su R2:
    - b) La route è stata originata da 1.1.1.1
    - c) La route è bloccata dal loop detection
    - d) Il cluster-id è il next-hop della route
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---

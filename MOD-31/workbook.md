@@ -783,3 +783,14 @@ R1(config-ext-nacl)# 5 deny tcp any any eq 23   ! inserita prima del permit (seq
    - **b) Nell'ACL inbound, per permettere il traffico di risposta**
    - c) Nella configurazione globale con `ip reflexive-list`
    - d) Sul router opposto che riceve la connessione
+
+
+---
+
+> © 2026 Matteo Mirenda — Tutti i diritti riservati.
+> Materiale ad uso esclusivo degli studenti iscritti al corso.
+> Vietata la riproduzione, distribuzione o condivisione
+> senza autorizzazione scritta dell'autore.
+> CCNP ENCOR 350-401 
+
+---
