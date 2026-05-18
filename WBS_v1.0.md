@@ -1,7 +1,7 @@
 # WBS — Da MVP a v1.0
 # Materiale Didattico CCNP ENCOR 350-401
 
-> Creato: 2026-05-16 · Stato: IN CORSO · Versione attuale: MVP (v0.1)
+> Creato: 2026-05-16 · Aggiornato: 2026-05-18 · Stato: FASE 3 COMPLETATA · Versione attuale: v1.0-RC
 
 ---
 
@@ -62,14 +62,14 @@ Obiettivo: tutti i 35 moduli con slide .pptx.
 
 | Step | Task | Chi | Stato | Note |
 |------|------|-----|-------|------|
-| 3.1 | Definire struttura slide per tipo di modulo | 👤 Human + 🤖 CC | ⬜ | Quante slide per sezione tipo |
-| 3.2 | Generare master_template.pptx | 🤖 CC | ⬜ | python-pptx, 10 layout |
+| 3.1 | Definire struttura slide per tipo di modulo | 👤 Human + 🤖 CC | ✅ | 10 layout, script generate_slides.py — 2026-05-18 |
+| 3.2 | Generare master_template.pptx | 🤖 CC | ✅ | TEMPLATE/master_template.pptx — 2026-05-18 |
 | 3.3 | Review template visivo | 👤 Human | ⬜ | Font, colori, proporzioni |
 | 3.4 | Iterazione template se necessario | 🤖 CC | ⬜ | |
-| 3.5 | Generare slide deck MOD-13÷19 (batch 1 — completi) | 🤖 CC | ⬜ | Partendo da workbook |
+| 3.5 | Generare slide deck MOD-01÷19 (batch LAB) | 🤖 CC | ✅ | 19 deck generati — 2026-05-18 |
 | 3.6 | Review batch 1 | 👤 Human | ⬜ | Un modulo campione |
-| 3.7 | Generare slide deck tutti i rimanenti moduli LAB | 🤖 CC | ⬜ | |
-| 3.8 | Generare slide deck moduli TEORIA | 🤖 CC | ⬜ | MOD-07/20/21/22/23/24/25/35 |
+| 3.7 | Generare slide deck moduli LAB rimanenti (MOD-26÷34) | 🤖 CC | ✅ | 9 deck generati — 2026-05-18 |
+| 3.8 | Generare slide deck moduli TEORIA (MOD-20÷25, MOD-35) | 🤖 CC | ✅ | 7 deck generati — 2026-05-18 |
 | 3.9 | Review finale slide | 👤 Human | ⬜ | |
 
 ---
@@ -99,7 +99,7 @@ Obiettivo: repo versionata e distribuibile.
 | **MVP v0.1** | — | ✅ 23 moduli consegnati — 2026-05-14 |
 | **Content Complete** | Fine Fase 1 | 35 moduli con workbook + soluzione + cfg |
 | **Standard Complete** | Fine Fase 2 | ✅ Mermaid + cfg inline + uniformità — 2026-05-17 (⚠️ step 2.3/2.5 da completare da Human) |
-| **Slide Complete** | Fine Fase 3 | 35 slide deck .pptx |
+| **Slide Complete** | Fine Fase 3 | ✅ 35 slide deck .pptx generati — 2026-05-18 (⚠️ step 3.3/3.6/3.9 da Human review) |
 | **v1.0 Release** | Fine Fase 4 | Tag GitHub + Release ZIP |
 
 ---

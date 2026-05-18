@@ -83,11 +83,13 @@ Ordinati per impatto esame:
 | 2026-05-17 | MOD-31 | Completato ex-novo: workbook.md (T1-T5) + soluzione.md + cfg r1/r2 (OSPF+SSH+ACL+CoPP) |
 | 2026-05-17 | MOD-08 | Completato ex-novo: workbook.md (T1-T5) + soluzione.md + cfg 7 device (ISP-A/B, WAN-A/B, CORE, LAN-A/B) |
 | 2026-05-17 | MOD-09 | Completato ex-novo: workbook.md (T1/T2/T3A/B/C/T4) + soluzione.md + cfg 7 device (stato finale MOD-08) |
+| 2026-05-18 | ALL | Fase 3 COMPLETATA — generate_slides.py + 35 slide deck .pptx generati (MOD-01÷35) |
+| 2026-05-18 | ALL | SLIDE_REPORT.md creato · WBS_v1.0.md aggiornato Fase 3 ✅ · ROADMAP.md e MVP_DELIVERY.md aggiornati |
 
 ---
 
 ## Prossimi Passi (sessione successiva)
 
-1. **MOD-21/22** — SD-WAN / SD-Access (solo teoria, demo dCloud)
-2. **MOD-23/24/25** — Wireless (teoria + simulatore/hardware esterno)
-3. **Slide deck** — MOD-08/09 mancano di slide.pptx (bassa priorità, dopo teoria)
+1. **Review slide deck** — aprire campione in PowerPoint, verificare font/colori/layout
+2. **Fase 4** — .gitignore, CONTRIBUTING.md, README_GITHUB.md, push GitHub
+3. **Tag v1.0** + Release ZIP dopo review umana

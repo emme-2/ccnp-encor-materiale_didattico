@@ -1,51 +1,51 @@
 # MVP DELIVERY — Materiale CCNP ENCOR 350-401
 
-> Prodotto: 2026-05-14 · Versione: 1.0-MVP · Uniformazione Fase 2: 2026-05-17
+> Prodotto: 2026-05-14 · Versione: 1.0-RC · Uniformazione Fase 2: 2026-05-17 · Slide Fase 3: 2026-05-18
 
 ---
 
 ## Tabella Stato Moduli
 
-| MOD | Titolo | Area | Workbook | Soluzione | Cfg | Pronto |
-|-----|--------|------|:--------:|:---------:|:---:|:------:|
-| MOD-01 | OSPFv2 Fondamenta | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-02 | OSPFv2 Aree & Summarization | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-03 | OSPFv3 Dual-Stack | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-04 | OSPF Troubleshooting | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-05 | BGP Fondamenta | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-06 | BGP Traffic Engineering | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-07 | BGP Route Reflector & IPv6 BGP | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-08 | Redistribuzione BGP↔OSPF & Prefix Filtering | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-09 | PBR & Route Manipulation Avanzata | Routing | ✅ | ✅ | ✅ | ✅ |
-| MOD-10 | MPLS LDP & Fondamenta | MPLS | ✅ | ✅ | ✅ | ✅ |
-| MOD-11 | MPLS L3VPN | MPLS | ✅ | ✅ | ✅ | ✅ |
-| MOD-12 | MPLS L2VPN (AToM) | MPLS | ✅ | ✅ | ✅ | ✅ |
-| MOD-13 | EtherChannel LACP | Layer 2 | ✅ | ✅ | ✅ | ✅ |
-| MOD-14 | Spanning Tree RSTP/MST | Layer 2 | ✅ | ✅ | ✅ | ✅ |
-| MOD-15 | FHRP: HSRP, VRRP & GLBP | FHRP | ✅ | ✅ | ✅ | ✅ |
-| MOD-16 | IP SLA, SPAN & RSPAN | Assurance | ✅ | ✅ | ✅ | ✅ |
-| MOD-17 | VRF-Lite & GRE Tunneling | VPN | ✅ | ✅ | ✅ | ✅ |
-| MOD-18 | IPSec IKEv2 (VTI) | VPN | ✅ | ✅ | ✅² | ✅ |
-| MOD-19 | DMVPN Phase 1/2/3 | VPN | ✅ | ✅ | ✅² | ✅ |
-| MOD-20 | LISP, VXLAN & SD-Access | Arch. | n/a | n/a | n/a | ✅ |
-| MOD-21 | SD-WAN | SD-WAN | ⬜ | ⬜ | n/a | ❌ |
-| MOD-22 | SD-Access | SD-Access | ⬜ | ⬜ | n/a | ❌ |
-| MOD-23 | Wireless RF & Fondamenta | Wireless | ⬜ | ⬜ | n/a | ❌ |
-| MOD-24 | Wireless Deployment & WLC | Wireless | ⬜ | ⬜ | n/a | ❌ |
-| MOD-25 | Wireless Security | Wireless | ⬜ | ⬜ | n/a | ❌ |
-| MOD-26 | QoS MQC & CoPP | QoS | ✅ | ✅ | ✅ | ✅ |
-| MOD-27 | NAT, PAT & NTP | IP Services | ✅ | ✅ | ✅ | ✅ |
-| MOD-28 | Multicast PIM & Auto-RP | Multicast | ✅ | ✅ | ✅ | ✅ |
-| MOD-29 | NetFlow & SNMP | Assurance | ✅ | ✅ | ✅ | ✅ |
-| MOD-30 | AAA & RADIUS | Security | ✅ | ✅ | ✅ | ✅ |
-| MOD-31 | ACL, CoPP & Infrastructure Sec. | Security | ✅ | ✅ | ✅ | ✅ |
-| MOD-32 | EEM & Python Base | Automation | ✅ | ✅ | n/a | ✅ |
-| MOD-33 | Netmiko & Nornir | Automation | ✅ | ✅ | n/a | ✅ |
-| MOD-34 | Ansible & Git | Automation | ✅ | ✅ | n/a | ✅ |
-| MOD-35 | RESTCONF/NETCONF (Teoria) | Automation | n/a | n/a | n/a | ✅ |
+| MOD | Titolo | Area | Workbook | Soluzione | Cfg | Slide | Pronto |
+|-----|--------|------|:--------:|:---------:|:---:|:-----:|:------:|
+| MOD-01 | OSPFv2 Fondamenta | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-02 | OSPFv2 Aree & Summarization | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-03 | OSPFv3 Dual-Stack | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-04 | OSPF Troubleshooting | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-05 | BGP Fondamenta | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-06 | BGP Traffic Engineering | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-07 | BGP Route Reflector & IPv6 BGP | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-08 | Redistribuzione BGP↔OSPF & Prefix Filtering | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-09 | PBR & Route Manipulation Avanzata | Routing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-10 | MPLS LDP & Fondamenta | MPLS | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-11 | MPLS L3VPN | MPLS | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-12 | MPLS L2VPN (AToM) | MPLS | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-13 | EtherChannel LACP | Layer 2 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-14 | Spanning Tree RSTP/MST | Layer 2 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-15 | FHRP: HSRP, VRRP & GLBP | FHRP | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-16 | IP SLA, SPAN & RSPAN | Assurance | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-17 | VRF-Lite & GRE Tunneling | VPN | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-18 | IPSec IKEv2 (VTI) | VPN | ✅ | ✅ | ✅² | ✅ | ✅ |
+| MOD-19 | DMVPN Phase 1/2/3 | VPN | ✅ | ✅ | ✅² | ✅ | ✅ |
+| MOD-20 | LISP, VXLAN & SD-Access | Arch. | n/a | n/a | n/a | ✅ | ✅ |
+| MOD-21 | SD-WAN | SD-WAN | ⬜ | ⬜ | n/a | ✅ | ⚠️ |
+| MOD-22 | SD-Access | SD-Access | ⬜ | ⬜ | n/a | ✅ | ⚠️ |
+| MOD-23 | Wireless RF & Fondamenta | Wireless | ⬜ | ⬜ | n/a | ✅ | ⚠️ |
+| MOD-24 | Wireless Deployment & WLC | Wireless | ⬜ | ⬜ | n/a | ✅ | ⚠️ |
+| MOD-25 | Wireless Security | Wireless | ⬜ | ⬜ | n/a | ✅ | ⚠️ |
+| MOD-26 | QoS MQC & CoPP | QoS | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-27 | NAT, PAT & NTP | IP Services | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-28 | Multicast PIM & Auto-RP | Multicast | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-29 | NetFlow & SNMP | Assurance | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-30 | AAA & RADIUS | Security | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-31 | ACL, CoPP & Infrastructure Sec. | Security | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MOD-32 | EEM & Python Base | Automation | ✅ | ✅ | n/a | ✅ | ✅ |
+| MOD-33 | Netmiko & Nornir | Automation | ✅ | ✅ | n/a | ✅ | ✅ |
+| MOD-34 | Ansible & Git | Automation | ✅ | ✅ | n/a | ✅ | ✅ |
+| MOD-35 | RESTCONF/NETCONF (Teoria) | Automation | n/a | n/a | n/a | ✅ | ✅ |
 
-**Legenda:** ✅ presente · ⬜ mancante · ⚠️ parziale · ❌ non sviluppato · n/a non applicabile  
-¹ Cfg dedicati in `MOD-xx/cfg/` — contengono lo stato cumulativo dei lab precedenti (ogni modulo include le config dei moduli che lo precedono nella sequenza)  
+**Legenda:** ✅ presente · ⬜ mancante · ⚠️ parziale (slide ok, workbook da sviluppare) · n/a non applicabile  
+¹ Cfg dedicati in `MOD-xx/cfg/` — contengono lo stato cumulativo dei lab precedenti  
 ² Usa cfg iniziali da `MOD-17/cfg/` come punto di partenza — indicato esplicitamente nel workbook
 
 ---
