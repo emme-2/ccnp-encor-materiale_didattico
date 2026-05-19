@@ -80,16 +80,16 @@ Server TFTP di riferimento: `192.168.122.1` — path: `ENCOR/MOD-xx/device-cfg`
 
 ## Script
 
-### `generate_slides.py` — Generazione slide PPTX
+### `script/generate_slides.py` — Generazione slide PPTX
 
 ```bash
-python generate_slides.py          # tutti i moduli
-python generate_slides.py MOD-01   # solo un modulo
+python script/generate_slides.py          # tutti i moduli
+python script/generate_slides.py MOD-01   # solo un modulo
 ```
 
 Output: `MOD-XX/MOD-XX_slide.pptx`
 
-### `export_pdf.py` — Esportazione PDF
+### `script/export_pdf.py` — Esportazione PDF
 
 Converte `workbook.md`, `soluzione.md` e `note_docente.md` in PDF A4.
 I diagrammi Mermaid vengono renderizzati automaticamente via Chrome headless.
@@ -97,10 +97,10 @@ I diagrammi Mermaid vengono renderizzati automaticamente via Chrome headless.
 **Prerequisiti:** `pip install pymdown-extensions` · Google Chrome installato
 
 ```bash
-python export_pdf.py               # tutti i file
-python export_pdf.py MOD-01        # solo un modulo
-python export_pdf.py --force       # rigenera anche se il PDF esiste già
-python export_pdf.py --css-only    # rigenera solo il foglio di stile
+python script/export_pdf.py               # tutti i file
+python script/export_pdf.py MOD-01        # solo un modulo
+python script/export_pdf.py --force       # rigenera anche se il PDF esiste già
+python script/export_pdf.py --css-only    # rigenera solo il foglio di stile
 ```
 
 Output: `EXPORT/PDF/` (esclusa dal repo — rigenerare localmente)
