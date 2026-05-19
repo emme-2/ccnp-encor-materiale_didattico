@@ -356,7 +356,8 @@ def html_to_pdf(html_path, pdf_path, chrome_exe, timeout=90):
         str(chrome_exe),
         "--headless",
         f"--print-to-pdf={pdf_path}",
-        "--print-to-pdf-no-header",
+        "--print-to-pdf-no-header",   # Chrome < 112
+        "--no-pdf-header-footer",     # Chrome >= 112
         "--no-sandbox",
         "--disable-gpu",
         "--disable-extensions",
