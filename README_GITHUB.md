@@ -135,6 +135,49 @@ Server TFTP: `192.168.122.1` — path: `ENCOR/MOD-xx/device-cfg`
 
 ---
 
+## Script di Sviluppo
+
+Gli script nella root del progetto automatizzano la generazione del materiale.
+
+### `generate_slides.py` — Generazione slide PPTX
+
+Genera i deck PowerPoint per tutti i 35 moduli a partire dal contenuto definito nello script.
+
+```bash
+python generate_slides.py          # tutti i moduli
+python generate_slides.py MOD-01   # solo un modulo
+```
+
+Output: `MOD-XX/MOD-XX_slide.pptx`
+
+---
+
+### `export_pdf.py` — Esportazione PDF
+
+Converte `workbook.md`, `soluzione.md` e `note_docente.md` in PDF A4.
+I diagrammi Mermaid vengono renderizzati automaticamente via Chrome headless.
+
+**Prerequisiti:**
+```bash
+pip install pymdown-extensions
+```
+Google Chrome deve essere installato (rilevato automaticamente).
+Al primo avvio lo script scarica `mermaid.min.js` (~3 MB) da CDN.
+
+**Uso:**
+```bash
+python export_pdf.py               # tutti i file (workbook + soluzioni + note docente)
+python export_pdf.py MOD-01        # solo un modulo
+python export_pdf.py --force       # rigenera anche se il PDF esiste già
+python export_pdf.py --css-only    # rigenera solo il foglio di stile CSS
+```
+
+**Output:** `EXPORT/PDF/MOD-XX_workbook.pdf`, `MOD-XX_soluzione.pdf`, `MOD-XX_note_docente.pdf`
+
+> La directory `EXPORT/` è esclusa dal repo (`.gitignore`). I PDF si rigenerano localmente con il comando sopra.
+
+---
+
 ## Versioni
 
 Vedi [ROADMAP.md](ROADMAP.md) per lo stato di sviluppo e la roadmap verso v1.0.
