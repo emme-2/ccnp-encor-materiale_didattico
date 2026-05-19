@@ -27,6 +27,7 @@ EXPORT/js/
 # Archivi temporanei (eccetto repo lab)
 *.zip
 !MOD-32/ENCOR-LAB10-repo.zip
+script/output/*.zip
 
 #Note
 note
