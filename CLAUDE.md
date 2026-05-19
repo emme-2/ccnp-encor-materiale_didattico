@@ -1,6 +1,6 @@
 # PROGETTO: Materiale Didattico CCNP ENCOR 350-401
 
-> Aggiornato: 2026-05-14
+> Aggiornato: 2026-05-19
 
 ## Contesto
 Sviluppo di materiale didattico standard e riutilizzabile per corsi di 
@@ -29,17 +29,28 @@ in testa questa nota:
 > **Piattaforme supportate:** GNS3 · ContainerLab (vrnetlab/IOU) · EVE-NG
 
 ## Struttura Cartella Progetto
+
+```
 MATERIALE DIDATTICO ENCOR/
 ├── CLAUDE.md                  ← questo file
-├── MAPPATURA_LAB.md           ← generato da CC (inventario + moduli)
+├── README.md                  ← documentazione repo (unico README)
+├── ROADMAP.md                 ← stato sviluppo e priorità
 ├── TEMPLATE/
 │   ├── workbook_template.md
 │   └── master_slide.pptx
-├── LAB 01/
-├── LAB 02/
-└── ...
-## Struttura Target — Moduli Standard
-Il materiale sarà riorganizzato in MODULI autonomi (MOD-01, MOD-02...).
+├── script/
+│   ├── export_pdf.py          ← esporta MD → PDF A4 (workbook + soluzione + note)
+│   ├── generate_slides.py     ← genera deck .pptx per tutti i moduli
+│   └── generate_template.py   ← genera template workbook/slide
+├── EXPORT/                    ← output PDF (gitignored, rigenerare con export_pdf.py)
+│   ├── style.css
+│   └── PDF/
+├── MOD-01/ … MOD-35/          ← 35 moduli autonomi
+└── TEMPLATE/
+```
+
+## Struttura Moduli
+
 Ogni modulo è un'unità didattica indipendente con:
 - 1 o più argomenti del syllabus ENCOR
 - Workbook studenti
@@ -116,13 +127,10 @@ Ogni modulo è un'unità didattica indipendente con:
 10 Summary          — sfondo arancio, 3-5 concetti in bianco bold
 
 ## Riferimento Programma
-- File: CCNP_ENCOR_Programma_v2.docx
 - 11 sessioni, 43 ore, Mar–Mag 2026
 - Syllabus ufficiale: Cisco ENCOR 350-401
 
 ## Note Operative per Claude Code
-- Leggere sempre MAPPATURA_LAB.md prima di lavorare su un modulo
-- Aggiornare MAPPATURA_LAB.md dopo ogni modifica alla struttura
 - I file cfg usano sintassi IOS (non IOS-XE): verificare compatibilità IOU
 - RESTCONF non disponibile su IOU → trattare come teoria
 - LISP/VXLAN → solo teoria e diagrammi, nessun lab pratico
@@ -135,8 +143,17 @@ Ogni modulo è un'unità didattica indipendente con:
 - Includere sempre: hostname · IP interfacce · ruolo device · tipo link
 - NON usare ASCII art in nessun caso
 
+## Script
+
+| Script | Uso |
+|--------|-----|
+| `script/generate_slides.py` | `python script/generate_slides.py [MOD-XX]` |
+| `script/export_pdf.py` | `python script/export_pdf.py [MOD-XX] [--force] [--css-only]` |
+| `script/generate_template.py` | generazione template workbook/slide |
+
+`export_pdf.py` richiede: `pip install pymdown-extensions` · Google Chrome installato.
+Output PDF in `EXPORT/PDF/` (gitignored).
+
 ## Versioning
-- MVP (v0.1): 23 moduli · workbook + soluzione + cfg
-- v1.0 target: 35 moduli · Mermaid · cfg inline ·
-  multipiattaforma · slide deck
-- Changelog: aggiornare ROOT/ROADMAP.md dopo ogni sessione
+- v1.0: 35 moduli · Mermaid · cfg inline · multipiattaforma · slide deck
+- Changelog: aggiornare ROADMAP.md dopo ogni sessione
