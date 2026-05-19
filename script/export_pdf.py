@@ -11,7 +11,7 @@ from pathlib import Path
 import markdown
 
 # ─── Configurazione ──────────────────────────────────────────────────────────
-BASE_DIR    = Path(__file__).parent
+BASE_DIR    = Path(__file__).parent.parent   # root del progetto
 EXPORT_DIR  = BASE_DIR / "EXPORT"
 PDF_DIR     = EXPORT_DIR / "PDF"
 TMP_DIR     = EXPORT_DIR / "tmp"
@@ -32,6 +32,7 @@ WORKBOOK_MODS = [
     "MOD-07","MOD-08","MOD-09","MOD-10","MOD-11","MOD-12",
     "MOD-13","MOD-14","MOD-15","MOD-16","MOD-17","MOD-18",
     "MOD-19","MOD-26","MOD-27","MOD-28","MOD-29","MOD-30","MOD-31",
+    "MOD-32","MOD-33","MOD-34",
 ]
 SOLUZIONE_MODS = [
     "MOD-01","MOD-02","MOD-03","MOD-04","MOD-05","MOD-06",
