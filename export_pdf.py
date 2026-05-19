@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-export_pdf.py — Esporta workbook.md e note_docente.md in PDF A4.
+export_pdf.py — Esporta workbook.md, soluzione.md e note_docente.md in PDF A4.
                 I blocchi Mermaid vengono renderizzati via mermaid.js in Chrome.
 Uso:  python export_pdf.py [MOD-XX] [--force] [--css-only]
 Deps: pip install pymdown-extensions
@@ -33,10 +33,18 @@ WORKBOOK_MODS = [
     "MOD-13","MOD-14","MOD-15","MOD-16","MOD-17","MOD-18",
     "MOD-19","MOD-26","MOD-27","MOD-28","MOD-29","MOD-30","MOD-31",
 ]
+SOLUZIONE_MODS = [
+    "MOD-01","MOD-02","MOD-03","MOD-04","MOD-05","MOD-06",
+    "MOD-07","MOD-08","MOD-09","MOD-10","MOD-11","MOD-12",
+    "MOD-13","MOD-14","MOD-15","MOD-16","MOD-17","MOD-18",
+    "MOD-19","MOD-26","MOD-27","MOD-28","MOD-29","MOD-30","MOD-31",
+    "MOD-32","MOD-33","MOD-34",
+]
 NOTE_MODS = ["MOD-20","MOD-21","MOD-22","MOD-23","MOD-24","MOD-25","MOD-35"]
 
 TARGET_FILES = (
     [(m, "workbook",     BASE_DIR / m / "workbook.md")     for m in WORKBOOK_MODS] +
+    [(m, "soluzione",    BASE_DIR / m / "soluzione.md")    for m in SOLUZIONE_MODS] +
     [(m, "note_docente", BASE_DIR / m / "note_docente.md") for m in NOTE_MODS]
 )
 
